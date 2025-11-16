@@ -52,7 +52,7 @@ export default function Preview({ strokes }: Props) {
           })}
         </svg>
       </div>
-      <p className="mt-2 text-sm text-gray-600">Playback matches your drawing speed. Use the controls to preview before exporting.</p>
+      <p className="mt-2 text-sm text-gray-700">Playback matches your drawing speed. Use the controls to preview before exporting.</p>
     </div>
   );
 }

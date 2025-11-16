@@ -29,14 +29,15 @@ export default function Preview({ strokes }: Props) {
   const onRestart = () => { setKey(v => v + 1); };
 
   return (
-    <div className="w-full max-w-3xl mx-auto mt-6">
-      <div className="flex items-center gap-3 mb-3">
+    <div className="w-full max-w-3xl mx-auto">
+      <div className="flex flex-wrap items-center gap-3 mb-3">
         <button className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50" onClick={onPlay} disabled={!strokes.length || playing}>Play</button>
         <button className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50" onClick={onPause} disabled={!strokes.length || !playing}>Pause</button>
         <button className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={onRestart} disabled={!strokes.length}>Restart</button>
       </div>
       <div className={`rounded-lg border ${isWhite ? "border-gray-700 bg-black" : "border-gray-200 bg-white"} shadow-sm`}>
-        <svg key={key} ref={svgRef} width={b.width} height={b.height} viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`}>
+        <div className="h-[46vh] sm:h-[360px]">
+          <svg key={key} ref={svgRef} className="w-full h-full" viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`} preserveAspectRatio="xMidYMid meet">
           {strokes.map((s, idx) => {
             const len = strokeLength(s);
             const clamp = (v: number) => Math.min(1, Math.max(0, v));
@@ -56,7 +57,8 @@ export default function Preview({ strokes }: Props) {
               </path>
             );
           })}
-        </svg>
+          </svg>
+        </div>
       </div>
       <p className="mt-2 text-sm text-gray-700">Playback matches your drawing speed. Use the controls to preview before exporting.</p>
     </div>

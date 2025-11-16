@@ -46,10 +46,10 @@ export default function ExportButtons({ strokes }: Props) {
   return (
     <div className="w-full max-w-3xl mx-auto mt-6">
       <div className="flex flex-wrap items-center gap-3">
-        <button className="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm disabled:opacity-50" onClick={onExportSVG} disabled={!strokes.length || !!loading.svg}>{loading.svg ? "Exporting SVG..." : "Export SVG"}</button>
-        <button className="px-4 py-2 rounded-md bg-fuchsia-600 hover:bg-fuchsia-700 text-white shadow-sm disabled:opacity-50" onClick={onExportVideo} disabled={!strokes.length || !!loading.video}>{loading.video ? "Exporting Video..." : "Export MP4"}</button>
-        <button className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white shadow-sm disabled:opacity-50" onClick={onExportLottie} disabled={!strokes.length || !!loading.lottie}>{loading.lottie ? "Exporting Lottie..." : "Export Lottie JSON"}</button>
-        <span className="text-sm text-gray-700">Duration: {(durMs / 1000).toFixed(2)}s • Size: {Math.round(b.width)}×{Math.round(b.height)}</span>
+        <button className="w-full sm:w-auto px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm disabled:opacity-50" onClick={onExportSVG} disabled={!strokes.length || !!loading.svg}>{loading.svg ? "Exporting SVG..." : "Export SVG"}</button>
+        <button className="w-full sm:w-auto px-4 py-2 rounded-md bg-fuchsia-600 hover:bg-fuchsia-700 text-white shadow-sm disabled:opacity-50" onClick={onExportVideo} disabled={!strokes.length || !!loading.video}>{loading.video ? "Exporting Video..." : "Export MP4"}</button>
+        <button className="w-full sm:w-auto px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white shadow-sm disabled:opacity-50" onClick={onExportLottie} disabled={!strokes.length || !!loading.lottie}>{loading.lottie ? "Exporting Lottie..." : "Export Lottie JSON"}</button>
+        <span className="w-full text-center sm:text-left text-sm text-gray-700">Duration: {(durMs / 1000).toFixed(2)}s • Size: {Math.round(b.width)}×{Math.round(b.height)}</span>
       </div>
       <p className="mt-2 text-sm text-gray-700">Preview before exporting. Video uses browser encoder and may fall back to WebM depending on support.</p>
     </div>

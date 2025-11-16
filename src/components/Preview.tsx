@@ -35,18 +35,18 @@ export default function Preview({ strokes }: Props) {
         <svg key={key} ref={svgRef} width={b.width} height={b.height} viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`}>
           {strokes.map((s, idx) => {
             const len = strokeLength(s);
-            const times = s.points.map(p => Math.min(1, Math.max(0, p.t / totalDur)));
-            let acc = 0; const vals: string[] = [String(len)];
-            for (let i = 1; i < s.points.length; i++) {
+            const clamp = (v: number) => Math.min(1, Math.max(0, v));
+            const times = s.points.map(p => clamp(p.t / totalDur));
+            let acc = 0; const values: string[] = s.points.map((_, i) => {
+              if (i === 0) return String(len);
               acc += Math.hypot(s.points[i].x - s.points[i - 1].x, s.points[i].y - s.points[i - 1].y);
-              vals.push(String(len - acc));
-            }
-            const keyTimes = [0, ...times].join(";");
-            const values = vals.join(";");
+              return String(len - acc);
+            });
+            const keyTimes = times.join(";");
             const d = `M ${s.points[0]?.x ?? 0} ${s.points[0]?.y ?? 0}` + s.points.slice(1).map(p => ` L ${p.x} ${p.y}`).join("");
             return (
               <path key={idx} d={d} fill="none" stroke={s.color} strokeWidth={s.width} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={len} strokeDashoffset={len}>
-                <animate attributeName="stroke-dashoffset" values={values} keyTimes={keyTimes} dur={`${totalDur}ms`} calcMode="linear" fill="freeze" />
+                <animate attributeName="stroke-dashoffset" values={values.join(";")} keyTimes={keyTimes} dur={`${totalDur}ms`} calcMode="linear" fill="freeze" />
               </path>
             );
           })}

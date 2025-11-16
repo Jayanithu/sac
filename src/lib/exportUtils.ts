@@ -54,15 +54,20 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
 };
 
 export const recordAnimationToVideo = async (strokes: Stroke[], width: number, height: number, fps = 60, mimePreferred = "video/mp4") => {
+  if (!strokes.length) throw new Error("Nothing to record");
+  if (typeof window === "undefined" || !("MediaRecorder" in window)) throw new Error("MediaRecorder not supported");
   const canvas = document.createElement("canvas");
-  canvas.width = width; canvas.height = height;
-  const ctx = canvas.getContext("2d")!;
+  canvas.width = Math.max(1, Math.round(width));
+  canvas.height = Math.max(1, Math.round(height));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Cannot get 2D context");
   const stream = canvas.captureStream(fps);
   const mime = MediaRecorder.isTypeSupported(mimePreferred) ? mimePreferred : (MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4");
   const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 });
   const chunks: BlobPart[] = [];
-  const promise = new Promise<Blob>(resolve => {
-    recorder.ondataavailable = e => chunks.push(e.data);
+  const promise = new Promise<Blob>((resolve, reject) => {
+    recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
+    recorder.onerror = e => reject(new Error((e as any).error?.message || "Recording error"));
     recorder.onstop = () => resolve(new Blob(chunks, { type: mime }));
   });
   const b = getBounds(strokes);
@@ -70,13 +75,13 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
   const durMs = totalDurationMs(strokes) || 1;
   const totalLen = totalLength(strokes);
   let start = performance.now();
-  recorder.start();
+  recorder.start(200);
   const drawFrame = () => {
     const now = performance.now();
     const elapsed = Math.min(durMs, now - start);
     const targetLen = (elapsed / durMs) * totalLen;
     const partial = partialStrokesUpToLength(strokes, targetLen);
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const s of partial) {
       if (!s.points.length) continue;
       ctx.strokeStyle = s.color; ctx.lineWidth = s.width; ctx.lineCap = "round"; ctx.lineJoin = "round";
@@ -86,7 +91,7 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
       ctx.stroke();
     }
     if (elapsed < durMs) requestAnimationFrame(drawFrame);
-    else recorder.stop();
+    else setTimeout(() => recorder.stop(), 100);
   };
   requestAnimationFrame(drawFrame);
   return promise;

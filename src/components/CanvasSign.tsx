@@ -9,6 +9,7 @@ export default function CanvasSign({ onChange }: Props) {
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [drawing, setDrawing] = useState(false);
   const [color, setColor] = useState("#111827");
+  const isWhite = (color || "").toLowerCase() === "#ffffff" || (color || "").toLowerCase() === "#fff";
   const [width, setWidth] = useState(4);
   const startRef = useRef<number | null>(null);
   const currentStrokeRef = useRef<Stroke | null>(null);
@@ -119,7 +120,7 @@ export default function CanvasSign({ onChange }: Props) {
         <button className="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={clearAll} disabled={!strokes.length}>Clear</button>
         <span className={`text-xs ${drawing ? "text-emerald-600" : "text-gray-400"}`}>{drawing ? "Recording…" : "Idle"}</span>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className={`rounded-lg border ${isWhite ? "border-gray-700 bg-black" : "border-gray-200 bg-white"} shadow-sm`}>
         <div style={{ height: 360 }}>
           <canvas ref={canvasRef} className="w-full h-full" style={{ touchAction: "none" }} />
         </div>

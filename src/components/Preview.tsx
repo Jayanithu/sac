@@ -11,6 +11,10 @@ export default function Preview({ strokes }: Props) {
 
   const b = useMemo(() => getBounds(strokes), [strokes]);
   const totalDur = useMemo(() => totalDurationMs(strokes) || 1, [strokes]);
+  const isWhite = useMemo(() => strokes.some(s => {
+    const c = (s.color || "").toLowerCase();
+    return c === "#ffffff" || c === "#fff";
+  }), [strokes]);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -31,7 +35,7 @@ export default function Preview({ strokes }: Props) {
         <button className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50" onClick={onPause} disabled={!strokes.length || !playing}>Pause</button>
         <button className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={onRestart} disabled={!strokes.length}>Restart</button>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className={`rounded-lg border ${isWhite ? "border-gray-700 bg-black" : "border-gray-200 bg-white"} shadow-sm`}>
         <svg key={key} ref={svgRef} width={b.width} height={b.height} viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`}>
           {strokes.map((s, idx) => {
             const len = strokeLength(s);

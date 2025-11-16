@@ -112,16 +112,16 @@ export default function CanvasSign({ onChange }: Props) {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-3">
-        <label className="flex items-center gap-2"><span className="text-sm">Color</span><input type="color" value={color} onChange={e => setColor(e.target.value)} /></label>
-        <label className="flex items-center gap-2"><span className="text-sm">Width</span><input type="range" min={1} max={20} value={width} onChange={e => setWidth(Number(e.target.value))} /></label>
-        <button className="px-3 py-1 bg-gray-200 rounded" onClick={undo} disabled={!strokes.length}>Undo</button>
-        <button className="px-3 py-1 bg-gray-200 rounded" onClick={clearAll} disabled={!strokes.length}>Clear</button>
-        <span className={`text-xs ${drawing ? "text-green-600" : "text-gray-400"}`}>{drawing ? "Recording" : "Idle"}</span>
+      <div className="flex items-center gap-4 mb-3">
+        <label className="flex items-center gap-2"><span className="text-sm text-gray-600">Color</span><input className="h-8 w-12 rounded" type="color" value={color} onChange={e => setColor(e.target.value)} /></label>
+        <label className="flex items-center gap-2"><span className="text-sm text-gray-600">Width</span><input className="h-2" type="range" min={1} max={20} value={width} onChange={e => setWidth(Number(e.target.value))} /></label>
+        <button className="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={undo} disabled={!strokes.length}>Undo</button>
+        <button className="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={clearAll} disabled={!strokes.length}>Clear</button>
+        <span className={`text-xs ${drawing ? "text-emerald-600" : "text-gray-400"}`}>{drawing ? "Recording…" : "Idle"}</span>
       </div>
-      <div className="border rounded-md bg-white/80">
-        <div style={{ height: 320 }}>
-          <canvas ref={canvasRef} className="touch-none w-full h-full" />
+      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div style={{ height: 360 }}>
+          <canvas ref={canvasRef} className="w-full h-full" style={{ touchAction: "none" }} />
         </div>
       </div>
       <p className="mt-2 text-sm text-gray-600">Draw your signature. Use color and width controls. Undo removes the last stroke; Clear resets.</p>

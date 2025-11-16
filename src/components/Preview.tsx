@@ -30,12 +30,12 @@ export default function Preview({ strokes }: Props) {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="flex flex-wrap items-center gap-3 mb-3">
-        <button className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50" onClick={onPlay} disabled={!strokes.length || playing}>Play</button>
-        <button className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50" onClick={onPause} disabled={!strokes.length || !playing}>Pause</button>
-        <button className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={onRestart} disabled={!strokes.length}>Restart</button>
+      <div className="flex flex-wrap items-center gap-3 mb-3 rounded-lg p-2 sm:p-3 bg-white/70 dark:bg-zinc-900/50 ring-1 ring-black/5 dark:ring-white/10">
+        <button className="px-4 py-2 rounded-md bg-gradient-to-b from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-sm ring-1 ring-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900 disabled:opacity-50" onClick={onPlay} disabled={!strokes.length || playing}>Play</button>
+        <button className="px-4 py-2 rounded-md bg-gradient-to-b from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-sm ring-1 ring-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900 disabled:opacity-50" onClick={onPause} disabled={!strokes.length || !playing}>Pause</button>
+        <button className="px-4 py-2 rounded-md bg-gradient-to-b from-white to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-900 shadow-sm ring-1 ring-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900 disabled:opacity-50" onClick={onRestart} disabled={!strokes.length}>Restart</button>
       </div>
-      <div className={`rounded-lg border ${isWhite ? "border-gray-700 bg-black" : "border-gray-200 bg-white"} shadow-sm`}>
+      <div className={`rounded-xl ${isWhite ? "border-gray-700 bg-black" : "border-transparent bg-white/70 dark:bg-zinc-900/60"} ring-1 ring-black/10 dark:ring-white/10 shadow-lg`}>
         <div className="h-[46vh] sm:h-[360px]">
           <svg key={key} ref={svgRef} className="w-full h-full" viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`} preserveAspectRatio="xMidYMid meet">
           {strokes.map((s, idx) => {

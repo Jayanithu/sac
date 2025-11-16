@@ -113,14 +113,14 @@ export default function CanvasSign({ onChange }: Props) {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3 rounded-lg p-2 sm:p-3 bg-white/70 dark:bg-zinc-900/50 ring-1 ring-black/5 dark:ring-white/10">
         <label className="flex items-center gap-2 w-full sm:w-auto"><span className="text-sm text-gray-700">Color</span><input className="h-8 w-12 rounded" type="color" value={color} onChange={e => setColor(e.target.value)} /></label>
         <label className="flex items-center gap-2 flex-1 min-w-0"><span className="text-sm text-gray-700">Width</span><input className="h-2 w-full sm:w-40" type="range" min={1} max={20} value={width} onChange={e => setWidth(Number(e.target.value))} /></label>
-        <button className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={undo} disabled={!strokes.length}>Undo</button>
-        <button className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={clearAll} disabled={!strokes.length}>Clear</button>
+        <button className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gradient-to-b from-white to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-900 shadow-sm ring-1 ring-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900 disabled:opacity-50" onClick={undo} disabled={!strokes.length}>Undo</button>
+        <button className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gradient-to-b from-white to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-900 shadow-sm ring-1 ring-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900 disabled:opacity-50" onClick={clearAll} disabled={!strokes.length}>Clear</button>
         <span className={`text-xs ${drawing ? "text-emerald-600" : "text-gray-400"}`}>{drawing ? "Recording…" : "Idle"}</span>
       </div>
-      <div className={`rounded-lg border ${isWhite ? "border-gray-700 bg-black" : "border-gray-200 bg-white"} shadow-sm`}>
+      <div className={`rounded-xl ${isWhite ? "border-gray-700 bg-black" : "border-transparent bg-white/70 dark:bg-zinc-900/60"} ring-1 ring-black/10 dark:ring-white/10 shadow-lg`}>
         <div className="h-[46vh] sm:h-[360px]">
           <canvas ref={canvasRef} className="w-full h-full" style={{ touchAction: "none" }} />
         </div>

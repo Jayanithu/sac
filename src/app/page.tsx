@@ -25,14 +25,14 @@ export default function Page() {
     localStorage.setItem('theme', next);
   };
   return (
-    <main className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 px-4 sm:px-6 py-8 sm:py-10">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen bg-gradient-to-b from-zinc-50 via-white to-zinc-100 dark:from-[#0b0b0b] dark:via-black dark:to-zinc-900 px-4 sm:px-6 py-8 sm:py-10">
+      <div className="max-w-4xl mx-auto rounded-2xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur p-4 sm:p-6 ring-1 ring-black/5 dark:ring-white/10 shadow-xl">
         <header className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">Signature Animation Creator</h1>
             <p className="text-gray-700 dark:text-zinc-300">Draw your signature, preview the animated reveal, and export as SVG, MP4, or Lottie JSON.</p>
           </div>
-          <button aria-label="Toggle theme" onClick={toggleTheme} className="relative inline-flex h-8 w-16 items-center rounded-full bg-gray-300 dark:bg-zinc-700 transition">
+          <button aria-label="Toggle theme" onClick={toggleTheme} className="relative inline-flex h-8 w-16 items-center rounded-full bg-gray-300 dark:bg-zinc-700 ring-1 ring-black/10 dark:ring-white/10 shadow-inner transition">
             <span className="absolute left-1 inline-block h-6 w-6 rounded-full bg-white shadow transition-transform" style={{ transform: theme === 'dark' ? 'translateX(32px)' : 'translateX(0px)' }} />
             <span className="sr-only">Theme</span>
           </button>

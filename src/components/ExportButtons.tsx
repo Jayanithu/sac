@@ -27,8 +27,12 @@ export default function ExportButtons({ strokes }: Props) {
   const onExportVideo = async () => {
     setLoading(s => ({ ...s, video: true }));
     try {
-      const blob = await recordAnimationToVideo(strokes, Math.round(b.width), Math.round(b.height));
+      const w = Math.max(1, Math.round(b.width));
+      const h = Math.max(1, Math.round(b.height));
+      const blob = await recordAnimationToVideo(strokes, w, h);
       download("signature.mp4", blob);
+    } catch (e: any) {
+      alert(e?.message || "Recording failed. Your browser may not support MediaRecorder.");
     } finally { setLoading(s => ({ ...s, video: false })); }
   };
 
@@ -42,9 +46,9 @@ export default function ExportButtons({ strokes }: Props) {
   return (
     <div className="w-full max-w-3xl mx-auto mt-6">
       <div className="flex flex-wrap items-center gap-3">
-        <button className="px-3 py-2 bg-emerald-600 text-white rounded disabled:opacity-50" onClick={onExportSVG} disabled={!strokes.length || !!loading.svg}>{loading.svg ? "Exporting SVG..." : "Export SVG"}</button>
-        <button className="px-3 py-2 bg-pink-600 text-white rounded disabled:opacity-50" onClick={onExportVideo} disabled={!strokes.length || !!loading.video}>{loading.video ? "Exporting Video..." : "Export MP4"}</button>
-        <button className="px-3 py-2 bg-blue-600 text-white rounded disabled:opacity-50" onClick={onExportLottie} disabled={!strokes.length || !!loading.lottie}>{loading.lottie ? "Exporting Lottie..." : "Export Lottie JSON"}</button>
+        <button className="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm disabled:opacity-50" onClick={onExportSVG} disabled={!strokes.length || !!loading.svg}>{loading.svg ? "Exporting SVG..." : "Export SVG"}</button>
+        <button className="px-4 py-2 rounded-md bg-fuchsia-600 hover:bg-fuchsia-700 text-white shadow-sm disabled:opacity-50" onClick={onExportVideo} disabled={!strokes.length || !!loading.video}>{loading.video ? "Exporting Video..." : "Export MP4"}</button>
+        <button className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white shadow-sm disabled:opacity-50" onClick={onExportLottie} disabled={!strokes.length || !!loading.lottie}>{loading.lottie ? "Exporting Lottie..." : "Export Lottie JSON"}</button>
         <span className="text-sm text-gray-600">Duration: {(durMs / 1000).toFixed(2)}s • Size: {Math.round(b.width)}×{Math.round(b.height)}</span>
       </div>
       <p className="mt-2 text-sm text-gray-600">Preview before exporting. Video uses browser encoder and may fall back to WebM depending on support.</p>

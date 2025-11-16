@@ -74,12 +74,25 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
   const offsetX = -b.minX; const offsetY = -b.minY;
   const durMs = totalDurationMs(strokes) || 1;
   const totalLen = totalLength(strokes);
+  const timeline = cumulativeLengthTimeline(strokes);
+  const lengthAt = (t: number) => {
+    if (!timeline.length) return 0;
+    if (t <= timeline[0].timeMs) return 0;
+    for (let i = 0; i < timeline.length - 1; i++) {
+      const a = timeline[i], b2 = timeline[i + 1];
+      if (t >= a.timeMs && t <= b2.timeMs) {
+        const r = (t - a.timeMs) / Math.max(1, (b2.timeMs - a.timeMs));
+        return a.length + r * (b2.length - a.length);
+      }
+    }
+    return timeline[timeline.length - 1].length;
+  };
   let start = performance.now();
   recorder.start(200);
   const drawFrame = () => {
     const now = performance.now();
     const elapsed = Math.min(durMs, now - start);
-    const targetLen = (elapsed / durMs) * totalLen;
+    const targetLen = lengthAt(elapsed);
     const partial = partialStrokesUpToLength(strokes, targetLen);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const s of partial) {

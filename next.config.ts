@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    typedRoutes: false
+  },
+  turbopack: {
+    root: "/Users/sithirajayanithu/Downloads/projects/sac"
+  }
 };
 
 export default nextConfig;

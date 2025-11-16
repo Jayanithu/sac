@@ -26,12 +26,12 @@ export default function Preview({ strokes }: Props) {
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-6">
-      <div className="flex items-center gap-3 mb-2">
-        <button className="px-3 py-1 bg-indigo-600 text-white rounded" onClick={onPlay} disabled={!strokes.length || playing}>Play</button>
-        <button className="px-3 py-1 bg-indigo-600 text-white rounded" onClick={onPause} disabled={!strokes.length || !playing}>Pause</button>
-        <button className="px-3 py-1 bg-gray-200 rounded" onClick={onRestart} disabled={!strokes.length}>Restart</button>
+      <div className="flex items-center gap-3 mb-3">
+        <button className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50" onClick={onPlay} disabled={!strokes.length || playing}>Play</button>
+        <button className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50" onClick={onPause} disabled={!strokes.length || !playing}>Pause</button>
+        <button className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-900 shadow-sm disabled:opacity-50" onClick={onRestart} disabled={!strokes.length}>Restart</button>
       </div>
-      <div className="border rounded-md bg-white/80">
+      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
         <svg key={key} ref={svgRef} width={b.width} height={b.height} viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`}>
           {strokes.map((s, idx) => {
             const len = strokeLength(s);

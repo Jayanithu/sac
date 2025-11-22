@@ -1,7 +1,5 @@
 "use client" 
 
-import * as React from "react"
-
 import { motion } from "motion/react";
 
 export const BlurredStagger = ({
@@ -11,7 +9,6 @@ export const BlurredStagger = ({
   text: string;
   className?: string;
 }) => {
-  const headingText = text;
 
   const container = {
     hidden: { opacity: 0 },
@@ -41,7 +38,7 @@ export const BlurredStagger = ({
       animate="show"
       className={className}
     >
-      {headingText.split("").map((char, index) => (
+      {text.split("").map((char, index) => (
         <motion.span
           key={index}
           variants={letterAnimation}

@@ -25,15 +25,8 @@ export default function Page() {
     localStorage.setItem('theme', next);
   };
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300/20 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-200/10 dark:bg-indigo-500/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+    <main className="min-h-screen bg-white dark:bg-black">
+      <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <header className="mb-8 sm:mb-12">
@@ -52,7 +45,7 @@ export default function Page() {
                 className="group relative inline-flex h-11 w-20 items-center rounded-full bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-sm ring-1 ring-slate-300/50 dark:ring-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <span 
-                  className="absolute left-1.5 inline-block h-8 w-8 rounded-full bg-white dark:bg-slate-700 shadow-lg ring-1 ring-slate-200/50 dark:ring-slate-600/50 transition-all duration-300 flex items-center justify-center" 
+                  className="absolute left-1.5 h-8 w-8 rounded-full bg-white dark:bg-slate-700 shadow-lg ring-1 ring-slate-200/50 dark:ring-slate-600/50 transition-all duration-300 flex items-center justify-center" 
                   style={{ transform: theme === 'dark' ? 'translateX(44px)' : 'translateX(0px)' }}
                 >
                   <span className="text-lg">{theme === 'dark' ? '🌙' : '☀️'}</span>
@@ -116,6 +109,9 @@ export default function Page() {
                   <span>Export in SVG for web, MP4 for video, or Lottie JSON for cross-platform animations.</span>
                 </li>
               </ul>
+            </div>
+            <div className="mt-8 text-center">
+              <p className="text-sm text-slate-600 dark:text-slate-400">© 2025 @jayanithu/sac</p>
             </div>
           </footer>
         </div>

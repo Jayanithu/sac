@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import StructuredData from "../components/StructuredData";
+import StructuredData from "../components/seo/StructuredData";
+import { SITE_CONFIG } from "../constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://sac.jayanithu.dev'),
+  metadataBase: new URL(SITE_CONFIG.url),
   title: {
     default: "sac - Signature Animation Creator | Create Animated Signatures",
     template: "%s | sac"

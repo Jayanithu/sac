@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Stroke, getBounds, strokeLength, totalDurationMs } from "../lib/pathUtils";
+import type { Stroke } from "../../types";
+import { getBounds, strokeLength, totalDurationMs } from "../../lib/pathUtils";
 
 type Props = { strokes: Stroke[] };
 

@@ -1,11 +1,13 @@
+import { SITE_CONFIG } from '../../constants';
+
 export default function StructuredData() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sac.jayanithu.dev';
+  const baseUrl = SITE_CONFIG.url;
 
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "sac - Signature Animation Creator",
-    "description": "Create stunning animated signatures with ease. Draw your signature, preview the animated reveal, and export in multiple formats including SVG, MP4, and Lottie JSON.",
+    "name": SITE_CONFIG.name,
+    "description": SITE_CONFIG.description,
     "url": baseUrl,
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Web Browser",
@@ -16,12 +18,12 @@ export default function StructuredData() {
     },
     "creator": {
       "@type": "Person",
-      "name": "Jayanithu",
-      "url": "https://github.com/Jayanithu",
+      "name": SITE_CONFIG.author.name,
+      "url": SITE_CONFIG.author.github,
       "sameAs": [
-        "https://github.com/Jayanithu",
-        "https://www.linkedin.com/in/jayanithu-perera-ba7a46264/",
-        "https://x.com/Jayaniithu"
+        SITE_CONFIG.author.github,
+        SITE_CONFIG.author.linkedin,
+        SITE_CONFIG.author.twitter
       ]
     },
     "featureList": [
@@ -38,12 +40,12 @@ export default function StructuredData() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": "Jayanithu",
-    "url": "https://github.com/Jayanithu",
+    "name": SITE_CONFIG.author.name,
+    "url": SITE_CONFIG.author.github,
     "sameAs": [
-      "https://github.com/Jayanithu",
-      "https://www.linkedin.com/in/jayanithu-perera-ba7a46264/",
-      "https://x.com/Jayaniithu"
+      SITE_CONFIG.author.github,
+      SITE_CONFIG.author.linkedin,
+      SITE_CONFIG.author.twitter
     ]
   };
 

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { motion } from "framer-motion";
-import { BlurredStagger } from "./ui/blurred-stagger-text";
+import { BlurredStagger } from "../ui/blurred-stagger-text";
 
 type Props = { onEnter: () => void };
 

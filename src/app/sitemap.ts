@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next'
+import { SITE_CONFIG } from '../constants'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sac.jayanithu.dev'
+  const baseUrl = SITE_CONFIG.url
 
   return [
     {

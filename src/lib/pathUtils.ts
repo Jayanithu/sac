@@ -1,5 +1,5 @@
-export type Point = { x: number; y: number; t: number };
-export type Stroke = { points: Point[]; color: string; width: number };
+import type { Point, Stroke, LengthTime, Bounds } from '../types';
+import { CANVAS_PADDING } from '../constants';
 
 export const normalizeTimes = (strokes: Stroke[]) => {
   if (!strokes.length) return strokes;
@@ -19,7 +19,7 @@ export const getBounds = (strokes: Stroke[]) => {
     if (p.y > maxY) maxY = p.y;
   }
   if (!isFinite(minX)) return { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0 };
-  const pad = 16;
+  const pad = CANVAS_PADDING;
   return {
     minX: minX - pad,
     minY: minY - pad,
@@ -56,8 +56,6 @@ export const svgPathFromStrokes = (strokes: Stroke[]) => {
   }
   return d.trim();
 };
-
-export type LengthTime = { timeMs: number; length: number };
 
 export const cumulativeLengthTimeline = (strokes: Stroke[]): LengthTime[] => {
   const list: LengthTime[] = [];

@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Stroke, getBounds, totalDurationMs } from "../lib/pathUtils";
-import { buildAnimatedSVG, buildLottieJSON, recordAnimationToVideo } from "../lib/exportUtils";
+import type { Stroke } from "../../types";
+import { getBounds, totalDurationMs } from "../../lib/pathUtils";
+import { buildAnimatedSVG, buildLottieJSON, recordAnimationToVideo } from "../../lib/exportUtils";
 
 type Props = { strokes: Stroke[] };
 

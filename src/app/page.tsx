@@ -1,30 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
-import CanvasSign from "../components/CanvasSign";
-import Preview from "../components/Preview";
-import ExportButtons from "../components/ExportButtons";
-import Landing from "../components/Landing";
-import { Stroke, normalizeTimes } from "../lib/pathUtils";
+import { useState } from "react";
+import CanvasSign from "../components/canvas/CanvasSign";
+import Preview from "../components/preview/Preview";
+import ExportButtons from "../components/export/ExportButtons";
+import Landing from "../components/landing/Landing";
+import type { Stroke } from "../types";
+import { normalizeTimes } from "../lib/pathUtils";
+import { useTheme } from "../hooks/useTheme";
 
 export default function Page() {
   const [showLanding, setShowLanding] = useState(true);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const normalized = normalizeTimes(strokes);
-  const [theme, setTheme] = useState<'light'|'dark'>('light');
-  useEffect(() => {
-    const ls = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
-    const t = (ls === 'dark' || ls === 'light') ? (ls as 'light'|'dark') : 'light';
-    setTheme(t);
-    const root = document.documentElement;
-    if (t === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
-  }, []);
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    const root = document.documentElement;
-    if (next === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
-    localStorage.setItem('theme', next);
-  };
+  const { theme, toggleTheme } = useTheme();
 
   if (showLanding) {
     return <Landing onEnter={() => setShowLanding(false)} />;

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Stroke, Point } from "../lib/pathUtils";
+import type { Stroke, Point, DrawingMode } from "../../types";
+import { DEFAULT_STROKE_COLOR, DEFAULT_STROKE_WIDTH, DEFAULT_ZOOM, COLOR_PALETTE } from "../../constants";
 
 type Props = { onChange?: (strokes: Stroke[]) => void };
 
@@ -9,14 +10,14 @@ export default function CanvasSign({ onChange }: Props) {
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [undone, setUndone] = useState<Stroke[]>([]);
   const [drawing, setDrawing] = useState(false);
-  const [mode, setMode] = useState<'draw'|'erase'>('draw');
-  const [color, setColor] = useState("#111827");
+  const [mode, setMode] = useState<DrawingMode>('draw');
+  const [color, setColor] = useState(DEFAULT_STROKE_COLOR);
   const isWhite = (color || "").toLowerCase() === "#ffffff" || (color || "").toLowerCase() === "#fff";
-  const [width, setWidth] = useState(4);
-  const [zoom, setZoom] = useState(1);
+  const [width, setWidth] = useState(DEFAULT_STROKE_WIDTH);
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [pan, setPan] = useState<{x:number;y:number}>({ x: 0, y: 0 });
   const [shiftDown, setShiftDown] = useState(false);
-  const palette = ["#111827","#ef4444","#10b981","#3b82f6","#f59e0b","#ffffff","#000000"];
+  const palette = COLOR_PALETTE;
   const startRef = useRef<number | null>(null);
   const currentStrokeRef = useRef<Stroke | null>(null);
 

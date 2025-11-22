@@ -1,4 +1,6 @@
-import { Stroke, getBounds, svgPathFromStrokes, strokeLength, totalDurationMs, cumulativeLengthTimeline, partialStrokesUpToLength } from "./pathUtils";
+import type { Stroke } from '../types';
+import { getBounds, svgPathFromStrokes, strokeLength, totalDurationMs, cumulativeLengthTimeline, partialStrokesUpToLength } from "./pathUtils";
+import { DEFAULT_FPS, LOTTIE_VERSION, VIDEO_BITRATE } from '../constants';
 
 export const buildAnimatedSVG = (strokes: Stroke[]) => {
   if (!strokes.length) return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"></svg>';
@@ -30,11 +32,11 @@ export const buildAnimatedSVG = (strokes: Stroke[]) => {
   return svgParts.join("");
 };
 
-export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
+export const buildLottieJSON = (strokes: Stroke[], fps = DEFAULT_FPS) => {
   const validStrokes = strokes.filter(s => s.points.length > 0);
   if (!validStrokes.length) {
     return {
-      v: "5.7.4",
+      v: LOTTIE_VERSION,
       fr: fps,
       ip: 0,
       op: 0,
@@ -85,7 +87,7 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
   }
   
   const json: any = {
-    v: "5.7.4",
+    v: LOTTIE_VERSION,
     fr: fps,
     ip: 0,
     op: totalFrames,
@@ -99,7 +101,7 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
   return json;
 };
 
-export const recordAnimationToVideo = async (strokes: Stroke[], width: number, height: number, fps = 60, mimePreferred = "video/mp4") => {
+export const recordAnimationToVideo = async (strokes: Stroke[], width: number, height: number, fps = DEFAULT_FPS, mimePreferred = "video/mp4") => {
   const validStrokes = strokes.filter(s => s.points.length > 0);
   if (!validStrokes.length) throw new Error("Nothing to record");
   if (typeof window === "undefined" || !("MediaRecorder" in window)) throw new Error("MediaRecorder not supported");
@@ -112,7 +114,7 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
   
   const stream = canvas.captureStream(fps);
   const mime = MediaRecorder.isTypeSupported(mimePreferred) ? mimePreferred : (MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4");
-  const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 });
+  const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: VIDEO_BITRATE });
   const chunks: BlobPart[] = [];
   const promise = new Promise<Blob>((resolve, reject) => {
     recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };

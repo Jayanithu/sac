@@ -64,9 +64,35 @@ export default function Page() {
 
           {/* Main Content */}
           <section className="space-y-8 lg:space-y-10">
-            <CanvasSign onChange={setStrokes} />
-            <Preview strokes={normalized} />
-            <ExportButtons strokes={normalized} />
+            {/* Side-by-side layout for desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              {/* Canvas Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-1 w-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Canvas</h2>
+                </div>
+                <CanvasSign onChange={setStrokes} />
+              </div>
+              
+              {/* Preview Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-1 w-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Preview</h2>
+                </div>
+                <Preview strokes={normalized} />
+              </div>
+            </div>
+            
+            {/* Export section - full width */}
+            <div className="mt-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-1 w-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full"></div>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Export</h2>
+              </div>
+              <ExportButtons strokes={normalized} />
+            </div>
           </section>
 
           {/* Footer Tips */}

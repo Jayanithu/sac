@@ -38,7 +38,10 @@ export default function Page() {
           <header className="mb-8 sm:mb-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="space-y-2">
-                <h1 className="text-7xl sm:text-8xl lg:text-9xl font-bold text-slate-900 dark:text-white tracking-tight">
+                <h1 
+                  className="text-7xl sm:text-8xl lg:text-9xl font-bold text-slate-900 dark:text-white tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => setShowLanding(true)}
+                >
                   sac
                 </h1>
                 <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl">
@@ -111,7 +114,17 @@ export default function Page() {
               </ul>
             </div>
             <div className="mt-8 text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-400">© 2025 @jayanithu/sac</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                © 2025{" "}
+                <a 
+                  href="https://github.com/Jayanithu" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-slate-900 dark:hover:text-slate-200 underline transition-colors"
+                >
+                  @jayanithu/sac
+                </a>
+              </p>
             </div>
           </footer>
         </div>

@@ -49,7 +49,17 @@ export default function Landing({ onEnter }: Props) {
       <footer className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="mt-8 text-center">
-            <p className="text-sm text-slate-600 dark:text-slate-400">© 2025 @jayanithu/sac</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              © 2025{" "}
+              <a 
+                href="https://github.com/Jayanithu" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-slate-900 dark:hover:text-slate-200 underline transition-colors"
+              >
+                @jayanithu/sac
+              </a>
+            </p>
           </div>
         </div>
       </footer>

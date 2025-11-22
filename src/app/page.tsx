@@ -38,8 +38,8 @@ export default function Page() {
           <header className="mb-8 sm:mb-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="space-y-2">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 dark:from-white dark:via-indigo-200 dark:to-white bg-clip-text text-transparent">
-                  Signature Animator
+                <h1 className="text-7xl sm:text-8xl lg:text-9xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  sac
                 </h1>
                 <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl">
                   Create stunning animated signatures. Draw, preview, and export in multiple formats.

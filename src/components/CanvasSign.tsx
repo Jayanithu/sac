@@ -114,7 +114,6 @@ export default function CanvasSign({ onChange }: Props) {
       const dpr = window.devicePixelRatio || 1;
       const scale = dpr * zoom;
       const tx = pan.x * dpr, ty = pan.y * dpr;
-      // grid
       const step = 24 * scale;
       ctx.strokeStyle = isWhite ? "#444" : "rgba(0,0,0,0.06)";
       ctx.lineWidth = 1;
@@ -122,7 +121,6 @@ export default function CanvasSign({ onChange }: Props) {
       for (let gx = (tx % step + step) % step; gx < canvas.width; gx += step) { ctx.moveTo(gx, 0); ctx.lineTo(gx, canvas.height); }
       for (let gy = (ty % step + step) % step; gy < canvas.height; gy += step) { ctx.moveTo(0, gy); ctx.lineTo(canvas.width, gy); }
       ctx.stroke();
-      // strokes
       for (const s of strokes) {
         if (!s.points.length) continue;
         ctx.strokeStyle = s.color; ctx.lineWidth = s.width * scale; ctx.lineCap = "round"; ctx.lineJoin = "round";
@@ -223,10 +221,8 @@ export default function CanvasSign({ onChange }: Props) {
 
   return (
     <div className="w-full">
-      {/* Main Controls Card */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50 mb-6">
         <div className="space-y-6">
-          {/* Top Row: Color Palette & Custom Color */}
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Colors</span>
@@ -252,7 +248,6 @@ export default function CanvasSign({ onChange }: Props) {
             </label>
           </div>
 
-          {/* Second Row: Width, Mode, Zoom */}
           <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-3 flex-1 min-w-[200px]">
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Width</span>
@@ -311,7 +306,6 @@ export default function CanvasSign({ onChange }: Props) {
             </div>
           </div>
 
-          {/* Third Row: Actions */}
           <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
             <button 
               className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200 dark:ring-slate-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
@@ -338,7 +332,6 @@ export default function CanvasSign({ onChange }: Props) {
         </div>
       </div>
 
-      {/* Canvas Card */}
       <div className={`rounded-2xl overflow-hidden shadow-xl ring-1 ${
         isWhite 
           ? "bg-slate-900 ring-slate-700" 
@@ -356,7 +349,6 @@ export default function CanvasSign({ onChange }: Props) {
         </div>
       </div>
 
-      {/* Stroke Editor */}
       {strokes.length > 0 && (
         <div className="mt-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50">
           <div className="flex items-center gap-2 mb-4">

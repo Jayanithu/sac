@@ -41,12 +41,10 @@ body {
   color: #f1f5f9; 
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -73,7 +71,6 @@ html {
   background: rgba(71, 85, 105, 0.7);
 }
 
-/* Input range styling */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -134,14 +131,12 @@ input[type="range"]::-moz-range-thumb:hover {
   box-shadow: 0 4px 8px rgba(99, 102, 241, 0.4);
 }
 
-/* Focus styles */
 button:focus-visible,
 input:focus-visible {
   outline: 2px solid rgb(99, 102, 241);
   outline-offset: 2px;
 }
 
-/* Animation utilities */
 @keyframes fadeIn {
   from {
     opacity: 0;

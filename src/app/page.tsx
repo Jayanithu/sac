@@ -28,7 +28,6 @@ export default function Page() {
     <main className="min-h-screen bg-white dark:bg-black">
       <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <header className="mb-8 sm:mb-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="space-y-2">
@@ -55,11 +54,8 @@ export default function Page() {
             </div>
           </header>
 
-          {/* Main Content */}
           <section className="space-y-8 lg:space-y-10">
-            {/* Side-by-side layout for desktop */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-              {/* Canvas Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="h-1 w-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
@@ -68,7 +64,6 @@ export default function Page() {
                 <CanvasSign onChange={setStrokes} />
               </div>
               
-              {/* Preview Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="h-1 w-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
@@ -78,7 +73,6 @@ export default function Page() {
               </div>
             </div>
             
-            {/* Export section - full width */}
             <div className="mt-8">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-1 w-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full"></div>
@@ -88,7 +82,6 @@ export default function Page() {
             </div>
           </section>
 
-          {/* Footer Tips */}
           <footer className="mt-12 sm:mt-16 pt-8 border-t border-slate-200/50 dark:border-slate-800/50">
             <div className="bg-gradient-to-r from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-2xl p-6 sm:p-8 backdrop-blur-sm ring-1 ring-slate-200/50 dark:ring-slate-800/50">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">

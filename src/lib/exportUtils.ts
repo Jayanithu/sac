@@ -10,10 +10,9 @@ export const buildAnimatedSVG = (strokes: Stroke[]) => {
     if (!s.points.length) continue;
     const d = svgPathFromStrokes([s]);
     const len = strokeLength(s);
-    if (len === 0) continue; // Skip zero-length strokes
+    if (len === 0) continue;
     const clamp = (v: number) => Math.min(1, Math.max(0, v));
     const times = s.points.map(p => clamp(p.t / totalDur));
-    // Calculate cumulative length more efficiently (matching Preview component logic)
     let acc = 0;
     const vals: string[] = s.points.map((_, i) => {
       if (i === 0) return String(len);
@@ -32,7 +31,6 @@ export const buildAnimatedSVG = (strokes: Stroke[]) => {
 };
 
 export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
-  // Filter out empty strokes
   const validStrokes = strokes.filter(s => s.points.length > 0);
   if (!validStrokes.length) {
     return {
@@ -53,7 +51,6 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
   const durMs = totalDurationMs(validStrokes) || 1;
   const totalFrames = Math.round((durMs / 1000) * fps);
   
-  // Create a layer for each stroke with its own color and width
   const layers: any[] = [];
   let currentLength = 0;
   
@@ -62,7 +59,6 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
     const i = s.points.map(_ => [0, 0]);
     const o = s.points.map(_ => [0, 0]);
     
-    // Convert hex color to RGB
     const hex = s.color.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16) / 255;
     const g = parseInt(hex.substring(2, 4), 16) / 255;
@@ -107,7 +103,6 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
 };
 
 export const recordAnimationToVideo = async (strokes: Stroke[], width: number, height: number, fps = 60, mimePreferred = "video/mp4") => {
-  // Filter out empty strokes
   const validStrokes = strokes.filter(s => s.points.length > 0);
   if (!validStrokes.length) throw new Error("Nothing to record");
   if (typeof window === "undefined" || !("MediaRecorder" in window)) throw new Error("MediaRecorder not supported");

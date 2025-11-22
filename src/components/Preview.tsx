@@ -30,7 +30,6 @@ export default function Preview({ strokes }: Props) {
 
   return (
     <div className="w-full">
-      {/* Controls Card */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50 mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <button 
@@ -66,7 +65,6 @@ export default function Preview({ strokes }: Props) {
         </div>
       </div>
 
-      {/* Preview Card */}
       <div className={`rounded-2xl overflow-hidden shadow-xl ring-1 ${
         isWhite 
           ? "bg-slate-900 ring-slate-700" 

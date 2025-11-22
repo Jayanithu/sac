@@ -72,7 +72,7 @@ export default function Preview({ strokes }: Props) {
           ? "bg-slate-900 ring-slate-700" 
           : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl ring-slate-200/50 dark:ring-slate-800/50"
       }`}>
-        <div className="h-[50vh] sm:h-[400px] lg:h-[500px] relative">
+        <div className="h-[50vh] sm:h-[400px] lg:h-[600px] relative">
           {!strokes.length && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center space-y-2">

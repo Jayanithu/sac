@@ -215,7 +215,7 @@ export default function CanvasSign({ onChange }: Props) {
       canvas.removeEventListener("pointercancel", onLeave);
       canvas.removeEventListener("pointerleave", onLeave);
     };
-  }, [color, width, drawing, strokes, zoom, pan, shiftDown, mode]);
+  }, [color, width, drawing, zoom, pan, shiftDown, mode]);
 
   const clearAll = () => { setStrokes([]); setUndone([]); startRef.current = null; };
   const undo = () => setStrokes(prev => { if (!prev.length) return prev; const next = [...prev]; const last = next.pop()!; setUndone(u => [last, ...u]); return next; });
@@ -344,7 +344,7 @@ export default function CanvasSign({ onChange }: Props) {
           ? "bg-slate-900 ring-slate-700" 
           : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl ring-slate-200/50 dark:ring-slate-800/50"
       }`}>
-        <div className="relative h-[50vh] sm:h-[400px] lg:h-[500px]">
+        <div className="relative h-[50vh] sm:h-[400px] lg:h-[600px]">
           <div className={`absolute top-4 left-4 z-10 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${
             drawing 
               ? 'bg-red-500/90 text-white shadow-lg ring-2 ring-red-400/50 animate-pulse' 
@@ -359,34 +359,41 @@ export default function CanvasSign({ onChange }: Props) {
       {/* Stroke Editor */}
       {strokes.length > 0 && (
         <div className="mt-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">Edit Strokes</h3>
-          <div className="overflow-x-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-lg">🎨</span>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Edit Individual Strokes</h3>
+            <span className="text-xs text-slate-500 dark:text-slate-400 ml-auto">({strokes.length} stroke{strokes.length !== 1 ? 's' : ''})</span>
+          </div>
+          <div className="overflow-x-auto pb-2">
             <div className="flex items-center gap-3 min-w-max">
               {strokes.map((s, i) => (
                 <div 
                   key={i} 
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-slate-300 dark:hover:ring-slate-600 transition-all"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-slate-300 dark:hover:ring-slate-600 hover:shadow-md transition-all"
                 >
-                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">#{i+1}</span>
+                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-1 rounded">#{i+1}</span>
                   <input 
                     type="color" 
                     value={s.color} 
                     onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, color: e.target.value } : ss))}
-                    className="h-8 w-12 rounded cursor-pointer"
+                    className="h-8 w-12 rounded cursor-pointer ring-1 ring-slate-200 dark:ring-slate-700"
                   />
-                  <input 
-                    type="range" 
-                    min={1} 
-                    max={20} 
-                    value={s.width} 
-                    onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, width: Number(e.target.value) } : ss))}
-                    className="h-2 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="range" 
+                      min={1} 
+                      max={20} 
+                      value={s.width} 
+                      onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, width: Number(e.target.value) } : ss))}
+                      className="h-2 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                    <span className="text-xs text-slate-600 dark:text-slate-400 w-6">{s.width}</span>
+                  </div>
                   <button 
                     className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 ring-1 ring-red-200 dark:ring-red-900 transition-colors" 
                     onClick={() => setStrokes(prev => prev.filter((_, idx) => idx !== i))}
                   >
-                    Delete
+                    🗑️
                   </button>
                 </div>
               ))}

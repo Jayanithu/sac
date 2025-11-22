@@ -3,9 +3,11 @@ import React, { useEffect, useState } from "react";
 import CanvasSign from "../components/CanvasSign";
 import Preview from "../components/Preview";
 import ExportButtons from "../components/ExportButtons";
+import Landing from "../components/Landing";
 import { Stroke, normalizeTimes } from "../lib/pathUtils";
 
 export default function Page() {
+  const [showLanding, setShowLanding] = useState(true);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const normalized = normalizeTimes(strokes);
   const [theme, setTheme] = useState<'light'|'dark'>('light');
@@ -24,6 +26,11 @@ export default function Page() {
     if (next === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
     localStorage.setItem('theme', next);
   };
+
+  if (showLanding) {
+    return <Landing onEnter={() => setShowLanding(false)} />;
+  }
+
   return (
     <main className="min-h-screen bg-white dark:bg-black">
       <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">

@@ -1,6 +1,7 @@
 import { Stroke, getBounds, svgPathFromStrokes, strokeLength, totalDurationMs, totalLength, cumulativeLengthTimeline, partialStrokesUpToLength } from "./pathUtils";
 
 export const buildAnimatedSVG = (strokes: Stroke[]) => {
+  if (!strokes.length) return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"></svg>';
   const b = getBounds(strokes);
   const totalDur = totalDurationMs(strokes) || 1;
   const svgParts: string[] = [];
@@ -9,10 +10,19 @@ export const buildAnimatedSVG = (strokes: Stroke[]) => {
     if (!s.points.length) continue;
     const d = svgPathFromStrokes([s]);
     const len = strokeLength(s);
-    const times = s.points.map(p => Math.min(1, Math.max(0, p.t / totalDur)));
-    const vals = s.points.map((p, i) => String(len - (i === 0 ? 0 : s.points.slice(1, i + 1).reduce((acc, _, j) => acc + Math.hypot(s.points[j + 1].x - s.points[j].x, s.points[j + 1].y - s.points[j].y), 0))));
-    const keyTimes = [0, ...times].join(";");
-    const values = [String(len), ...vals].join(";");
+    if (len === 0) continue; // Skip zero-length strokes
+    const clamp = (v: number) => Math.min(1, Math.max(0, v));
+    const times = s.points.map(p => clamp(p.t / totalDur));
+    // Calculate cumulative length more efficiently (matching Preview component logic)
+    let acc = 0;
+    const vals: string[] = s.points.map((_, i) => {
+      if (i === 0) return String(len);
+      acc += Math.hypot(s.points[i].x - s.points[i - 1].x, s.points[i].y - s.points[i - 1].y);
+      return String(len - acc);
+    });
+    const last = vals.at(-1) ?? String(len);
+    const keyTimes = [0, ...times, 1].join(";");
+    const values = [String(len), ...vals, last].join(";");
     svgParts.push(`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${len}" stroke-dashoffset="${len}">`);
     svgParts.push(`<animate attributeName="stroke-dashoffset" values="${values}" keyTimes="${keyTimes}" dur="${totalDur}ms" calcMode="linear" fill="freeze" />`);
     svgParts.push(`</path>`);
@@ -22,18 +32,65 @@ export const buildAnimatedSVG = (strokes: Stroke[]) => {
 };
 
 export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
-  const b = getBounds(strokes);
-  const durMs = totalDurationMs(strokes) || 1;
+  // Filter out empty strokes
+  const validStrokes = strokes.filter(s => s.points.length > 0);
+  if (!validStrokes.length) {
+    return {
+      v: "5.7.4",
+      fr: fps,
+      ip: 0,
+      op: 0,
+      w: 100,
+      h: 100,
+      nm: "Signature",
+      ddd: 0,
+      assets: [],
+      layers: []
+    };
+  }
+  
+  const b = getBounds(validStrokes);
+  const durMs = totalDurationMs(validStrokes) || 1;
   const totalFrames = Math.round((durMs / 1000) * fps);
-  const groupItems: any[] = [];
-  for (const s of strokes) {
+  
+  // Create a layer for each stroke with its own color and width
+  const layers: any[] = [];
+  let currentLength = 0;
+  
+  for (const s of validStrokes) {
     const v = s.points.map(p => [p.x - b.minX, p.y - b.minY]);
     const i = s.points.map(_ => [0, 0]);
     const o = s.points.map(_ => [0, 0]);
-    groupItems.push({ ty: "sh", d: 1, ks: { a: 0, k: { i, o, v, c: false } }, nm: "Path", hd: false });
+    
+    // Convert hex color to RGB
+    const hex = s.color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b_val = parseInt(hex.substring(4, 6), 16) / 255;
+    
+    const strokeLen = strokeLength(s);
+    const startFrame = Math.round((s.points[0]?.t || 0) / 1000 * fps);
+    const endFrame = Math.round((s.points[s.points.length - 1]?.t || durMs) / 1000 * fps);
+    
+    const groupItems: any[] = [
+      { ty: "sh", d: 1, ks: { a: 0, k: { i, o, v, c: false } }, nm: "Path", hd: false },
+      { ty: "st", c: { a: 0, k: [r, g, b_val, 1] }, w: { a: 0, k: s.width }, lc: 2, lj: 2, nm: "Stroke", hd: false },
+      { ty: "tm", s: { a: 0, k: 0 }, e: { a: 1, k: [{ t: 0, s: 0 }, { t: endFrame - startFrame, s: 100 }] }, o: { a: 0, k: 0 }, m: 1, nm: "Trim", hd: false }
+    ];
+    
+    layers.push({
+      ty: 4,
+      nm: `Stroke ${layers.length + 1}`,
+      ip: startFrame,
+      op: endFrame,
+      st: startFrame,
+      ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [0, 0, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+      shapes: [{ ty: "gr", it: groupItems, nm: "Group" }]
+    });
+    
+    currentLength += strokeLen;
   }
-  groupItems.push({ ty: "st", c: { a: 0, k: [0, 0, 0, 1] }, w: { a: 0, k: Math.max(...strokes.map(s => s.width)) }, lc: 2, lj: 2, nm: "Stroke", hd: false });
-  groupItems.push({ ty: "tm", s: { a: 0, k: 0 }, e: { a: 1, k: [{ t: 0, s: 0 }, { t: totalFrames, s: 100 }] }, o: { a: 0, k: 0 }, m: 1, nm: "Trim", hd: false });
+  
   const json: any = {
     v: "5.7.4",
     fr: fps,
@@ -44,23 +101,23 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
     nm: "Signature",
     ddd: 0,
     assets: [],
-    layers: [
-      { ty: 4, nm: "Stroke", ip: 0, op: totalFrames, st: 0,
-        ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [0, 0, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
-        shapes: [ { ty: "gr", it: groupItems, nm: "Group" } ] }
-    ]
+    layers
   };
   return json;
 };
 
 export const recordAnimationToVideo = async (strokes: Stroke[], width: number, height: number, fps = 60, mimePreferred = "video/mp4") => {
-  if (!strokes.length) throw new Error("Nothing to record");
+  // Filter out empty strokes
+  const validStrokes = strokes.filter(s => s.points.length > 0);
+  if (!validStrokes.length) throw new Error("Nothing to record");
   if (typeof window === "undefined" || !("MediaRecorder" in window)) throw new Error("MediaRecorder not supported");
+  
   const canvas = document.createElement("canvas");
   canvas.width = Math.max(1, Math.round(width));
   canvas.height = Math.max(1, Math.round(height));
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Cannot get 2D context");
+  
   const stream = canvas.captureStream(fps);
   const mime = MediaRecorder.isTypeSupported(mimePreferred) ? mimePreferred : (MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4");
   const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 });
@@ -70,11 +127,12 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
     recorder.onerror = e => reject(new Error((e as any).error?.message || "Recording error"));
     recorder.onstop = () => resolve(new Blob(chunks, { type: mime }));
   });
-  const b = getBounds(strokes);
+  
+  const b = getBounds(validStrokes);
   const offsetX = -b.minX; const offsetY = -b.minY;
-  const durMs = totalDurationMs(strokes) || 1;
-  const totalLen = totalLength(strokes);
-  const timeline = cumulativeLengthTimeline(strokes);
+  const durMs = totalDurationMs(validStrokes) || 1;
+  const timeline = cumulativeLengthTimeline(validStrokes);
+  
   const lengthAt = (t: number) => {
     if (!timeline.length) return 0;
     if (t <= timeline[0].timeMs) return 0;
@@ -87,13 +145,14 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
     }
     return timeline[timeline.length - 1].length;
   };
+  
   let start = performance.now();
   recorder.start(200);
   const drawFrame = () => {
     const now = performance.now();
     const elapsed = Math.min(durMs, now - start);
     const targetLen = lengthAt(elapsed);
-    const partial = partialStrokesUpToLength(strokes, targetLen);
+    const partial = partialStrokesUpToLength(validStrokes, targetLen);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const s of partial) {
       if (!s.points.length) continue;

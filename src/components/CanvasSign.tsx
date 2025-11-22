@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Stroke, Point } from "../lib/pathUtils";
 
 type Props = { onChange?: (strokes: Stroke[]) => void };

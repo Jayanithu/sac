@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, type KeyboardEvent } from "react";
+import { motion } from "framer-motion";
 import { BlurredStagger } from "./ui/blurred-stagger-text";
 
 type Props = { onEnter: () => void };
@@ -27,7 +28,7 @@ export default function Landing({ onEnter }: Props) {
       className={`min-h-screen bg-white dark:bg-black flex flex-col transition-opacity duration-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}
     >
       <div 
-        className="flex-1 flex items-center justify-center cursor-pointer"
+        className="flex-1 flex items-center justify-center cursor-pointer relative"
         onClick={handleClick}
         onKeyDown={handleKeyPress}
         tabIndex={0}
@@ -35,18 +36,33 @@ export default function Landing({ onEnter }: Props) {
         aria-label="Enter application"
       >
         <div className="text-center px-4 max-w-2xl mx-auto">
-          <div className="mb-6">
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
             <BlurredStagger 
               text="sac" 
               className="text-7xl sm:text-8xl lg:text-9xl font-bold text-slate-900 dark:text-white tracking-tight inline-block"
             />
-          </div>
-          <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
+          </motion.div>
+          <motion.p 
+            className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.8 }}
+          >
             Create stunning animated signatures with ease.
-          </p>
-          <p className="mt-6 text-sm text-slate-500 dark:text-slate-500">
+          </motion.p>
+          <motion.p 
+            className="mt-6 text-sm text-slate-500 dark:text-slate-500"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5, duration: 0.8 }}
+          >
             Click anywhere to continue
-          </p>
+          </motion.p>
         </div>
       </div>
       
@@ -70,4 +86,3 @@ export default function Landing({ onEnter }: Props) {
     </div>
   );
 }
-

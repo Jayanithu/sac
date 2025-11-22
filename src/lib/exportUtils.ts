@@ -1,4 +1,4 @@
-import { Stroke, getBounds, svgPathFromStrokes, strokeLength, totalDurationMs, totalLength, cumulativeLengthTimeline, partialStrokesUpToLength } from "./pathUtils";
+import { Stroke, getBounds, svgPathFromStrokes, strokeLength, totalDurationMs, cumulativeLengthTimeline, partialStrokesUpToLength } from "./pathUtils";
 
 export const buildAnimatedSVG = (strokes: Stroke[]) => {
   if (!strokes.length) return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"></svg>';
@@ -52,7 +52,6 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
   const totalFrames = Math.round((durMs / 1000) * fps);
   
   const layers: any[] = [];
-  let currentLength = 0;
   
   for (const s of validStrokes) {
     const v = s.points.map(p => [p.x - b.minX, p.y - b.minY]);
@@ -83,8 +82,6 @@ export const buildLottieJSON = (strokes: Stroke[], fps = 60) => {
       ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [0, 0, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
       shapes: [{ ty: "gr", it: groupItems, nm: "Group" }]
     });
-    
-    currentLength += strokeLen;
   }
   
   const json: any = {

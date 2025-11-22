@@ -73,14 +73,6 @@ export const cumulativeLengthTimeline = (strokes: Stroke[]): LengthTime[] => {
   return list;
 };
 
-export const keyTimesAndValues = (strokes: Stroke[]) => {
-  const tl = cumulativeLengthTimeline(strokes);
-  const duration = totalDurationMs(strokes) || 1;
-  const keyTimes = tl.map(x => Math.min(1, Math.max(0, x.timeMs / duration)));
-  const values = tl.map(x => String(totalLength(strokes) - x.length));
-  return { keyTimes, values, duration };
-};
-
 export const partialStrokesUpToLength = (strokes: Stroke[], target: number): Stroke[] => {
   const out: Stroke[] = [];
   let remaining = target;

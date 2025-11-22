@@ -215,55 +215,192 @@ export default function CanvasSign({ onChange }: Props) {
       canvas.removeEventListener("pointercancel", onLeave);
       canvas.removeEventListener("pointerleave", onLeave);
     };
-  }, [color, width, drawing, strokes, zoom, pan, shiftDown]);
+  }, [color, width, drawing, zoom, pan, shiftDown, mode]);
 
   const clearAll = () => { setStrokes([]); setUndone([]); startRef.current = null; };
   const undo = () => setStrokes(prev => { if (!prev.length) return prev; const next = [...prev]; const last = next.pop()!; setUndone(u => [last, ...u]); return next; });
   const redo = () => setUndone(u => { if (!u.length) return u; const [first, ...rest] = u; setStrokes(s => [...s, first]); return rest; });
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3 rounded-lg p-2 sm:p-3 bg-white/70 dark:bg-zinc-900/50 ring-1 ring-black/5 dark:ring-white/10">
-        <div className="flex items-center gap-2 order-1">
-          {palette.map(c => (
-            <button key={c} aria-label={c} className="h-6 w-6 rounded-full ring-1 ring-black/10" style={{ background: c }} onClick={() => setColor(c)} />
-          ))}
-        </div>
-        <label className="flex items-center gap-2 w-full sm:w-auto order-2"><span className="text-sm text-gray-700">Color</span><input className="h-8 w-12 rounded" type="color" value={color} onChange={e => setColor(e.target.value)} /></label>
-        <label className="flex items-center gap-2 flex-1 min-w-0 order-3"><span className="text-sm text-gray-700">Width</span><input className="h-2 w-full sm:w-40" type="range" min={1} max={20} value={width} onChange={e => setWidth(Number(e.target.value))} /></label>
-        <div className="flex items-center gap-2 order-4">
-          <button className={`px-3 py-1.5 rounded-md text-sm ${mode==='draw'?'bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-sm ring-1 ring-black/10':'bg-gradient-to-b from-white to-gray-100 text-gray-900 ring-1 ring-black/10'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900`} onClick={() => setMode('draw')}>Draw</button>
-          <button className={`px-3 py-1.5 rounded-md text-sm ${mode==='erase'?'bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-sm ring-1 ring-black/10':'bg-gradient-to-b from-white to-gray-100 text-gray-900 ring-1 ring-black/10'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900`} onClick={() => setMode('erase')}>Erase</button>
-        </div>
-        <div className="flex items-center gap-2 order-5 w-full sm:w-auto">
-          <span className="text-sm text-gray-700">Zoom</span>
-          <input className="h-2 w-full sm:w-32" type="range" min={0.5} max={3} step={0.1} value={zoom} onChange={e => setZoom(Number(e.target.value))} />
-          <button className="px-2 py-1 rounded-md text-sm bg-white text-gray-900 ring-1 ring-black/10" onClick={() => { setZoom(1); setPan({x:0,y:0}); }}>Reset View</button>
-        </div>
-        <button className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gradient-to-b from-white to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-900 shadow-sm ring-1 ring-black/10 disabled:opacity-50 order-6" onClick={undo} disabled={!strokes.length}>Undo</button>
-        <button className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gradient-to-b from-white to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-900 shadow-sm ring-1 ring-black/10 disabled:opacity-50 order-7" onClick={redo} disabled={!undone.length}>Redo</button>
-        <button className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gradient-to-b from-white to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-900 shadow-sm ring-1 ring-black/10 disabled:opacity-50 order-8" onClick={clearAll} disabled={!strokes.length}>Clear</button>
-
-      </div>
-      <div className={`rounded-xl ${isWhite ? "border-gray-700 bg-black" : "border-transparent bg-white/70 dark:bg-zinc-900/60"} ring-1 ring-black/10 dark:ring-white/10 shadow-lg`}>
-        <div className="relative h-[46vh] sm:h-[360px]">
-          <button className={`absolute top-2 left-2 px-2 py-1 rounded-md text-xs ${drawing ? 'bg-gradient-to-b from-rose-500 to-rose-600 text-white shadow-sm ring-1 ring-black/10' : 'bg-gradient-to-b from-white to-gray-100 text-gray-900 ring-1 ring-black/10'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900`}>{drawing ? 'Recording' : 'Idle'}</button>
-          <canvas ref={canvasRef} className="w-full h-full" style={{ touchAction: "none" }} />
-        </div>
-      </div>
-      <div className="mt-2 overflow-x-auto">
-        <div className="flex items-center gap-2">
-          {strokes.map((s, i) => (
-            <div key={i} className="flex items-center gap-2 px-2 py-1 rounded-md bg-white/70 dark:bg-zinc-900/60 ring-1 ring-black/10">
-              <span className="text-xs text-gray-700">#{i+1}</span>
-              <input type="color" value={s.color} onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, color: e.target.value } : ss))} />
-              <input type="range" min={1} max={20} value={s.width} onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, width: Number(e.target.value) } : ss))} />
-              <button className="px-2 py-1 text-xs rounded-md bg-white ring-1 ring-black/10" onClick={() => setStrokes(prev => prev.filter((_, idx) => idx !== i))}>Delete</button>
+    <div className="w-full">
+      {/* Main Controls Card */}
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50 mb-6">
+        <div className="space-y-6">
+          {/* Top Row: Color Palette & Custom Color */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Colors</span>
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+                {palette.map(c => (
+                  <button 
+                    key={c} 
+                    aria-label={c} 
+                    className={`h-8 w-8 rounded-full ring-2 transition-all duration-200 hover:scale-110 hover:ring-offset-2 ${
+                      color === c 
+                        ? 'ring-indigo-500 dark:ring-indigo-400 ring-offset-2 shadow-lg scale-110' 
+                        : 'ring-slate-300 dark:ring-slate-600 hover:ring-slate-400 dark:hover:ring-slate-500'
+                    }`}
+                    style={{ background: c }}
+                    onClick={() => setColor(c)}
+                  />
+                ))}
+              </div>
             </div>
-          ))}
+            <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-slate-300 dark:hover:ring-slate-600 transition-colors">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Custom</span>
+              <input className="h-8 w-12 rounded cursor-pointer" type="color" value={color} onChange={e => setColor(e.target.value)} />
+            </label>
+          </div>
+
+          {/* Second Row: Width, Mode, Zoom */}
+          <div className="flex flex-wrap items-center gap-4">
+            <label className="flex items-center gap-3 flex-1 min-w-[200px]">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Width</span>
+              <input 
+                className="h-2 flex-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                type="range" 
+                min={1} 
+                max={20} 
+                value={width} 
+                onChange={e => setWidth(Number(e.target.value))} 
+              />
+              <span className="text-sm text-slate-600 dark:text-slate-400 w-8 text-right">{width}px</span>
+            </label>
+            
+            <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+              <button 
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  mode === 'draw'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-slate-200 dark:ring-slate-600' 
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`} 
+                onClick={() => setMode('draw')}
+              >
+                ✏️ Draw
+              </button>
+              <button 
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  mode === 'erase'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-slate-200 dark:ring-slate-600' 
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`} 
+                onClick={() => setMode('erase')}
+              >
+                🗑️ Erase
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Zoom</span>
+              <input 
+                className="h-2 w-24 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                type="range" 
+                min={0.5} 
+                max={3} 
+                step={0.1} 
+                value={zoom} 
+                onChange={e => setZoom(Number(e.target.value))} 
+              />
+              <span className="text-sm text-slate-600 dark:text-slate-400 w-12 text-right">{Math.round(zoom * 100)}%</span>
+              <button 
+                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200 dark:ring-slate-700 transition-colors" 
+                onClick={() => { setZoom(1); setPan({x:0,y:0}); }}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          {/* Third Row: Actions */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <button 
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200 dark:ring-slate-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+              onClick={undo} 
+              disabled={!strokes.length}
+            >
+              <span>↶</span> Undo
+            </button>
+            <button 
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200 dark:ring-slate-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+              onClick={redo} 
+              disabled={!undone.length}
+            >
+              <span>↷</span> Redo
+            </button>
+            <button 
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 ring-1 ring-red-200 dark:ring-red-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+              onClick={clearAll} 
+              disabled={!strokes.length}
+            >
+              <span>🗑️</span> Clear All
+            </button>
+          </div>
         </div>
       </div>
-      <p className="mt-2 text-sm text-gray-700">Draw your signature. Use color and width controls. Use modes for erase/pick, Undo/Redo for history, and per-stroke edits below.</p>
+
+      {/* Canvas Card */}
+      <div className={`rounded-2xl overflow-hidden shadow-xl ring-1 ${
+        isWhite 
+          ? "bg-slate-900 ring-slate-700" 
+          : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl ring-slate-200/50 dark:ring-slate-800/50"
+      }`}>
+        <div className="relative h-[50vh] sm:h-[400px] lg:h-[600px]">
+          <div className={`absolute top-4 left-4 z-10 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${
+            drawing 
+              ? 'bg-red-500/90 text-white shadow-lg ring-2 ring-red-400/50 animate-pulse' 
+              : 'bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700'
+          }`}>
+            {drawing ? '● Recording' : '○ Idle'}
+          </div>
+          <canvas ref={canvasRef} className="w-full h-full cursor-crosshair" style={{ touchAction: "none" }} />
+        </div>
+      </div>
+
+      {/* Stroke Editor */}
+      {strokes.length > 0 && (
+        <div className="mt-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-lg">🎨</span>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Edit Individual Strokes</h3>
+            <span className="text-xs text-slate-500 dark:text-slate-400 ml-auto">({strokes.length} stroke{strokes.length !== 1 ? 's' : ''})</span>
+          </div>
+          <div className="overflow-x-auto pb-2">
+            <div className="flex items-center gap-3 min-w-max">
+              {strokes.map((s, i) => (
+                <div 
+                  key={i} 
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-slate-300 dark:hover:ring-slate-600 hover:shadow-md transition-all"
+                >
+                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-1 rounded">#{i+1}</span>
+                  <input 
+                    type="color" 
+                    value={s.color} 
+                    onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, color: e.target.value } : ss))}
+                    className="h-8 w-12 rounded cursor-pointer ring-1 ring-slate-200 dark:ring-slate-700"
+                  />
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="range" 
+                      min={1} 
+                      max={20} 
+                      value={s.width} 
+                      onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, width: Number(e.target.value) } : ss))}
+                      className="h-2 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                    <span className="text-xs text-slate-600 dark:text-slate-400 w-6">{s.width}</span>
+                  </div>
+                  <button 
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 ring-1 ring-red-200 dark:ring-red-900 transition-colors" 
+                    onClick={() => setStrokes(prev => prev.filter((_, idx) => idx !== i))}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

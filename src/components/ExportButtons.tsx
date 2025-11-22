@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Stroke, getBounds, totalDurationMs } from "../lib/pathUtils";
 import { buildAnimatedSVG, buildLottieJSON, recordAnimationToVideo } from "../lib/exportUtils";
 

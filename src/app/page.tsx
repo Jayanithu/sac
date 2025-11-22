@@ -13,8 +13,7 @@ export default function Page() {
   const [theme, setTheme] = useState<'light'|'dark'>('light');
   useEffect(() => {
     const ls = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
-    const sysDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const t = (ls === 'dark' || ls === 'light') ? (ls as 'light'|'dark') : (sysDark ? 'dark' : 'light');
+    const t = (ls === 'dark' || ls === 'light') ? (ls as 'light'|'dark') : 'light';
     setTheme(t);
     const root = document.documentElement;
     if (t === 'dark') root.classList.add('dark'); else root.classList.remove('dark');

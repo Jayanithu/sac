@@ -99,7 +99,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{__html: `!function(){try{var e=localStorage.getItem("theme");var s=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var t=e==="dark"||e==="light"?e:s;var r=document.documentElement;if(t==="dark")r.classList.add("dark");else r.classList.remove("dark")}catch{}}()`}} />
+        <script dangerouslySetInnerHTML={{__html: `!function(){try{var e=localStorage.getItem("theme");var t=e==="dark"||e==="light"?e:"light";var r=document.documentElement;if(t==="dark")r.classList.add("dark");else r.classList.remove("dark")}catch{}}()`}} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <StructuredData />

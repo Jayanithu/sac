@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { BlurredStagger } from "./ui/blurred-stagger-text";
 
 type Props = { onEnter: () => void };
 
@@ -34,9 +35,12 @@ export default function Landing({ onEnter }: Props) {
         aria-label="Enter application"
       >
         <div className="text-center px-4 max-w-2xl mx-auto">
-          <h1 className="text-7xl sm:text-8xl lg:text-9xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
-            sac
-          </h1>
+          <div className="mb-6">
+            <BlurredStagger 
+              text="sac" 
+              className="text-7xl sm:text-8xl lg:text-9xl font-bold text-slate-900 dark:text-white tracking-tight inline-block"
+            />
+          </div>
           <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
             Create stunning animated signatures with ease.
           </p>

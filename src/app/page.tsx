@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CanvasSign from "../components/CanvasSign";
 import Preview from "../components/Preview";
 import ExportButtons from "../components/ExportButtons";

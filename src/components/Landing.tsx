@@ -28,27 +28,27 @@ export default function Landing({ onEnter }: Props) {
       className={`min-h-screen bg-white dark:bg-black flex flex-col transition-opacity duration-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}
     >
       <div 
-        className="flex-1 flex items-center justify-center cursor-pointer relative"
+        className="flex-1 flex items-center justify-center cursor-pointer relative py-8 sm:py-12 touch-manipulation"
         onClick={handleClick}
         onKeyDown={handleKeyPress}
         tabIndex={0}
         role="button"
         aria-label="Enter application"
       >
-        <div className="text-center px-4 max-w-2xl mx-auto">
+        <div className="text-center px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto w-full">
           <motion.div 
-            className="mb-6"
+            className="mb-4 sm:mb-6 md:mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
             <BlurredStagger 
               text="sac" 
-              className="text-7xl sm:text-8xl lg:text-9xl font-bold text-slate-900 dark:text-white tracking-tight inline-block"
+              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold text-slate-900 dark:text-white tracking-tight inline-block leading-none"
             />
           </motion.div>
           <motion.p 
-            className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed px-2 sm:px-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 0.8 }}
@@ -56,7 +56,7 @@ export default function Landing({ onEnter }: Props) {
             Create stunning animated signatures with ease.
           </motion.p>
           <motion.p 
-            className="mt-6 text-sm text-slate-500 dark:text-slate-500"
+            className="mt-4 sm:mt-6 text-xs sm:text-sm text-slate-500 dark:text-slate-500 px-2 sm:px-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5, duration: 0.8 }}
@@ -66,16 +66,16 @@ export default function Landing({ onEnter }: Props) {
         </div>
       </div>
       
-      <footer className="px-4 sm:px-6 lg:px-8 py-8">
+      <footer className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mt-8 text-center">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+          <div className="mt-4 sm:mt-6 md:mt-8 text-center">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
               © 2025{" "}
               <a 
                 href="https://github.com/Jayanithu" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:text-slate-900 dark:hover:text-slate-200 underline transition-colors"
+                className="hover:text-slate-900 dark:hover:text-slate-200 underline transition-colors touch-manipulation"
               >
                 @jayanithu/sac
               </a>

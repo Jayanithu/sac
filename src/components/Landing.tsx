@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { BlurredStagger } from "./ui/blurred-stagger-text";
 
 type Props = { onEnter: () => void };
@@ -15,7 +15,7 @@ export default function Landing({ onEnter }: Props) {
     onEnter();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onEnter();

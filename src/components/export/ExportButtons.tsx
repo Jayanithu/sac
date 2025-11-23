@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import type { Stroke } from "../../types";
+import type { Stroke, BackgroundOption } from "../../types";
 import { getBounds, totalDurationMs } from "../../lib/pathUtils";
 import { buildAnimatedSVG, buildLottieJSON, recordAnimationToVideo } from "../../lib/exportUtils";
 
@@ -15,14 +15,21 @@ const download = (name: string, data: Blob | string, type?: string) => {
 
 export default function ExportButtons({ strokes }: Props) {
   const [loading, setLoading] = useState<{ svg?: boolean; video?: boolean; lottie?: boolean }>({});
+  const [bgSvg, setBgSvg] = useState<BackgroundOption>('transparent');
+  const [bgVideo, setBgVideo] = useState<BackgroundOption>('transparent');
+  const [bgLottie, setBgLottie] = useState<BackgroundOption>('transparent');
+  const [showBgSvg, setShowBgSvg] = useState(false);
+  const [showBgVideo, setShowBgVideo] = useState(false);
+  const [showBgLottie, setShowBgLottie] = useState(false);
   const b = useMemo(() => getBounds(strokes), [strokes]);
   const durMs = useMemo(() => totalDurationMs(strokes) || 1, [strokes]);
 
   const onExportSVG = () => {
     setLoading(s => ({ ...s, svg: true }));
-    const svg = buildAnimatedSVG(strokes);
+    const svg = buildAnimatedSVG(strokes, bgSvg);
     download("signature.svg", svg, "image/svg+xml");
     setLoading(s => ({ ...s, svg: false }));
+    setShowBgSvg(false);
   };
 
   const onExportVideo = async () => {
@@ -30,19 +37,68 @@ export default function ExportButtons({ strokes }: Props) {
     try {
       const w = Math.max(1, Math.round(b.width));
       const h = Math.max(1, Math.round(b.height));
-      const blob = await recordAnimationToVideo(strokes, w, h);
+      const blob = await recordAnimationToVideo(strokes, w, h, undefined, undefined, bgVideo);
       download("signature.mp4", blob);
     } catch (e: any) {
       alert(e?.message || "Recording failed. Your browser may not support MediaRecorder.");
-    } finally { setLoading(s => ({ ...s, video: false })); }
+    } finally { 
+      setLoading(s => ({ ...s, video: false })); 
+      setShowBgVideo(false);
+    }
   };
 
   const onExportLottie = () => {
     setLoading(s => ({ ...s, lottie: true }));
-    const json = buildLottieJSON(strokes);
+    const json = buildLottieJSON(strokes, undefined, bgLottie);
     download("signature.json", JSON.stringify(json), "application/json");
     setLoading(s => ({ ...s, lottie: false }));
+    setShowBgLottie(false);
   };
+
+  const BackgroundSelector = ({ 
+    value, 
+    onChange, 
+    show, 
+    onToggle 
+  }: { 
+    value: BackgroundOption; 
+    onChange: (v: BackgroundOption) => void; 
+    show: boolean;
+    onToggle: () => void;
+  }) => (
+    <div className="relative">
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
+        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 transition-colors"
+        disabled={!strokes.length}
+      >
+        {value === 'white' ? '⚪ White' : value === 'black' ? '⚫ Black' : '🔲 Transparent'}
+      </button>
+      {show && (
+        <>
+          <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-1 min-w-[140px]">
+            {(['white', 'black', 'transparent'] as BackgroundOption[]).map((opt) => (
+              <button
+                key={opt}
+                onClick={(e) => { e.stopPropagation(); onChange(opt); onToggle(); }}
+                className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${
+                  value === opt
+                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                }`}
+              >
+                {opt === 'white' ? '⚪ White' : opt === 'black' ? '⚫ Black' : '🔲 Transparent'}
+              </button>
+            ))}
+          </div>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={(e) => { e.stopPropagation(); onToggle(); }}
+          />
+        </>
+      )}
+    </div>
+  );
 
   return (
     <div className="w-full">
@@ -53,41 +109,50 @@ export default function ExportButtons({ strokes }: Props) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <button 
-            className="group relative px-6 py-4 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-emerald-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden" 
-            onClick={onExportSVG} 
-            disabled={!strokes.length || !!loading.svg}
-          >
-            <div className="relative z-10 flex flex-col items-center gap-2">
-              <span className="text-3xl">📄</span>
-              <span className="text-sm font-semibold">{loading.svg ? "Exporting..." : "Export SVG"}</span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
+          <div className="flex flex-col gap-3">
+            <button 
+              className="group relative px-6 py-4 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-emerald-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden" 
+              onClick={onExportSVG} 
+              disabled={!strokes.length || !!loading.svg}
+            >
+              <div className="relative z-10 flex flex-col items-center gap-2">
+                <span className="text-3xl">📄</span>
+                <span className="text-sm font-semibold">{loading.svg ? "Exporting..." : "Export SVG"}</span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+            <BackgroundSelector value={bgSvg} onChange={setBgSvg} show={showBgSvg} onToggle={() => setShowBgSvg(!showBgSvg)} />
+          </div>
 
-          <button 
-            className="group relative px-6 py-4 rounded-xl bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 hover:from-fuchsia-600 hover:to-fuchsia-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-fuchsia-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden" 
-            onClick={onExportVideo} 
-            disabled={!strokes.length || !!loading.video}
-          >
-            <div className="relative z-10 flex flex-col items-center gap-2">
-              <span className="text-3xl">🎬</span>
-              <span className="text-sm font-semibold">{loading.video ? "Exporting..." : "Export MP4"}</span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
+          <div className="flex flex-col gap-3">
+            <button 
+              className="group relative px-6 py-4 rounded-xl bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 hover:from-fuchsia-600 hover:to-fuchsia-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-fuchsia-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden" 
+              onClick={onExportVideo} 
+              disabled={!strokes.length || !!loading.video}
+            >
+              <div className="relative z-10 flex flex-col items-center gap-2">
+                <span className="text-3xl">🎬</span>
+                <span className="text-sm font-semibold">{loading.video ? "Exporting..." : "Export MP4"}</span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+            <BackgroundSelector value={bgVideo} onChange={setBgVideo} show={showBgVideo} onToggle={() => setShowBgVideo(!showBgVideo)} />
+          </div>
 
-          <button 
-            className="group relative px-6 py-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden" 
-            onClick={onExportLottie} 
-            disabled={!strokes.length || !!loading.lottie}
-          >
-            <div className="relative z-10 flex flex-col items-center gap-2">
-              <span className="text-3xl">🎨</span>
-              <span className="text-sm font-semibold">{loading.lottie ? "Exporting..." : "Export Lottie"}</span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
+          <div className="flex flex-col gap-3">
+            <button 
+              className="group relative px-6 py-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden" 
+              onClick={onExportLottie} 
+              disabled={!strokes.length || !!loading.lottie}
+            >
+              <div className="relative z-10 flex flex-col items-center gap-2">
+                <span className="text-3xl">🎨</span>
+                <span className="text-sm font-semibold">{loading.lottie ? "Exporting..." : "Export Lottie"}</span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+            <BackgroundSelector value={bgLottie} onChange={setBgLottie} show={showBgLottie} onToggle={() => setShowBgLottie(!showBgLottie)} />
+          </div>
         </div>
 
         {strokes.length > 0 && (

@@ -1,13 +1,17 @@
-import type { Stroke } from '../types';
+import type { Stroke, BackgroundOption } from '../types';
 import { getBounds, svgPathFromStrokes, strokeLength, totalDurationMs, cumulativeLengthTimeline, partialStrokesUpToLength } from "./pathUtils";
 import { DEFAULT_FPS, LOTTIE_VERSION, VIDEO_BITRATE, MAX_VIDEO_WIDTH, MAX_VIDEO_HEIGHT } from '../constants';
 
-export const buildAnimatedSVG = (strokes: Stroke[]) => {
+export const buildAnimatedSVG = (strokes: Stroke[], background: BackgroundOption = 'transparent') => {
   if (!strokes.length) return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"></svg>';
   const b = getBounds(strokes);
   const totalDur = totalDurationMs(strokes) || 1;
   const svgParts: string[] = [];
   svgParts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${b.width}" height="${b.height}" viewBox="${b.minX} ${b.minY} ${b.width} ${b.height}">`);
+  if (background !== 'transparent') {
+    const bgColor = background === 'white' ? '#ffffff' : '#000000';
+    svgParts.push(`<rect x="${b.minX}" y="${b.minY}" width="${b.width}" height="${b.height}" fill="${bgColor}"/>`);
+  }
   for (const s of strokes) {
     if (!s.points.length) continue;
     const d = svgPathFromStrokes([s]);
@@ -32,7 +36,7 @@ export const buildAnimatedSVG = (strokes: Stroke[]) => {
   return svgParts.join("");
 };
 
-export const buildLottieJSON = (strokes: Stroke[], fps = DEFAULT_FPS) => {
+export const buildLottieJSON = (strokes: Stroke[], fps = DEFAULT_FPS, background: BackgroundOption = 'transparent') => {
   const validStrokes = strokes.filter(s => s.points.length > 0);
   if (!validStrokes.length) {
     return {
@@ -54,6 +58,27 @@ export const buildLottieJSON = (strokes: Stroke[], fps = DEFAULT_FPS) => {
   const totalFrames = Math.round((durMs / 1000) * fps);
   
   const layers: any[] = [];
+  
+  if (background !== 'transparent') {
+    const bgColor = background === 'white' ? [1, 1, 1, 1] : [0, 0, 0, 1];
+    layers.push({
+      ty: 4,
+      nm: "Background",
+      ip: 0,
+      op: totalFrames,
+      st: 0,
+      ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [b.width / 2, b.height / 2, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+      shapes: [{
+        ty: "gr",
+        it: [
+          { ty: "rc", d: 1, s: { a: 0, k: [b.width, b.height] }, p: { a: 0, k: [b.width / 2, b.height / 2] }, r: { a: 0, k: 0 }, nm: "Rectangle Path 1", hd: false },
+          { ty: "fl", c: { a: 0, k: bgColor }, o: { a: 0, k: 100 }, r: 1, bm: 0, nm: "Fill 1", hd: false }
+        ],
+        nm: "Background",
+        hd: false
+      }]
+    });
+  }
   
   for (const s of validStrokes) {
     const v = s.points.map(p => [p.x - b.minX, p.y - b.minY]);
@@ -101,7 +126,7 @@ export const buildLottieJSON = (strokes: Stroke[], fps = DEFAULT_FPS) => {
   return json;
 };
 
-export const recordAnimationToVideo = async (strokes: Stroke[], width: number, height: number, fps = DEFAULT_FPS, mimePreferred = "video/mp4") => {
+export const recordAnimationToVideo = async (strokes: Stroke[], width: number, height: number, fps = DEFAULT_FPS, mimePreferred = "video/mp4", background: BackgroundOption = 'transparent') => {
   const validStrokes = strokes.filter(s => s.points.length > 0);
   if (!validStrokes.length) throw new Error("Nothing to record");
   if (typeof window === "undefined" || !("MediaRecorder" in window)) throw new Error("MediaRecorder not supported");
@@ -141,6 +166,8 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
   
   ctx.scale(scaleX, scaleY);
   
+  const bgColor = background === 'white' ? '#ffffff' : background === 'black' ? '#000000' : null;
+  
   const lengthAt = (t: number) => {
     if (!timeline.length) return 0;
     if (t <= timeline[0].timeMs) return 0;
@@ -161,7 +188,12 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
     const elapsed = Math.min(durMs, now - start);
     const targetLen = lengthAt(elapsed);
     const partial = partialStrokesUpToLength(validStrokes, targetLen);
-    ctx.clearRect(0, 0, width, height);
+    if (bgColor) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, width, height);
+    } else {
+      ctx.clearRect(0, 0, width, height);
+    }
     for (const s of partial) {
       if (!s.points.length) continue;
       ctx.strokeStyle = s.color; ctx.lineWidth = s.width; ctx.lineCap = "round"; ctx.lineJoin = "round";

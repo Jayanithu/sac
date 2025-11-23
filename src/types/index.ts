@@ -3,6 +3,7 @@ export type Stroke = { points: Point[]; color: string; width: number };
 export type LengthTime = { timeMs: number; length: number };
 export type Theme = 'light' | 'dark';
 export type DrawingMode = 'draw' | 'erase';
+export type BackgroundOption = 'white' | 'black' | 'transparent';
 export type Bounds = {
   minX: number;
   minY: number;

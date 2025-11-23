@@ -1,6 +1,6 @@
 import type { Stroke } from '../types';
 import { getBounds, svgPathFromStrokes, strokeLength, totalDurationMs, cumulativeLengthTimeline, partialStrokesUpToLength } from "./pathUtils";
-import { DEFAULT_FPS, LOTTIE_VERSION, VIDEO_BITRATE } from '../constants';
+import { DEFAULT_FPS, LOTTIE_VERSION, VIDEO_BITRATE, MAX_VIDEO_WIDTH, MAX_VIDEO_HEIGHT } from '../constants';
 
 export const buildAnimatedSVG = (strokes: Stroke[]) => {
   if (!strokes.length) return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"></svg>';
@@ -106,11 +106,23 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
   if (!validStrokes.length) throw new Error("Nothing to record");
   if (typeof window === "undefined" || !("MediaRecorder" in window)) throw new Error("MediaRecorder not supported");
   
+  let finalWidth = Math.max(1, Math.round(width));
+  let finalHeight = Math.max(1, Math.round(height));
+  
+  if (finalWidth > MAX_VIDEO_WIDTH || finalHeight > MAX_VIDEO_HEIGHT) {
+    const scale = Math.min(MAX_VIDEO_WIDTH / finalWidth, MAX_VIDEO_HEIGHT / finalHeight);
+    finalWidth = Math.round(finalWidth * scale);
+    finalHeight = Math.round(finalHeight * scale);
+  }
+  
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(width));
-  canvas.height = Math.max(1, Math.round(height));
+  canvas.width = finalWidth;
+  canvas.height = finalHeight;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Cannot get 2D context");
+  
+  const scaleX = finalWidth / width;
+  const scaleY = finalHeight / height;
   
   const stream = canvas.captureStream(fps);
   const mime = MediaRecorder.isTypeSupported(mimePreferred) ? mimePreferred : (MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4");
@@ -126,6 +138,8 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
   const offsetX = -b.minX; const offsetY = -b.minY;
   const durMs = totalDurationMs(validStrokes) || 1;
   const timeline = cumulativeLengthTimeline(validStrokes);
+  
+  ctx.scale(scaleX, scaleY);
   
   const lengthAt = (t: number) => {
     if (!timeline.length) return 0;
@@ -147,7 +161,7 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
     const elapsed = Math.min(durMs, now - start);
     const targetLen = lengthAt(elapsed);
     const partial = partialStrokesUpToLength(validStrokes, targetLen);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, width, height);
     for (const s of partial) {
       if (!s.points.length) continue;
       ctx.strokeStyle = s.color; ctx.lineWidth = s.width; ctx.lineCap = "round"; ctx.lineJoin = "round";

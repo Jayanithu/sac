@@ -2,9 +2,11 @@ export const DEFAULT_THEME: 'light' | 'dark' = 'light';
 export const DEFAULT_STROKE_COLOR = '#111827';
 export const DEFAULT_STROKE_WIDTH = 4;
 export const DEFAULT_ZOOM = 1;
-export const DEFAULT_FPS = 60;
+export const DEFAULT_FPS = 30;
 export const CANVAS_PADDING = 16;
-export const VIDEO_BITRATE = 4_000_000;
+export const VIDEO_BITRATE = 1_500_000;
+export const MAX_VIDEO_WIDTH = 1280;
+export const MAX_VIDEO_HEIGHT = 720;
 
 export const COLOR_PALETTE = [
   '#111827',

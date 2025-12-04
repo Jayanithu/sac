@@ -31,52 +31,53 @@ export default function Preview({ strokes }: Props) {
 
   return (
     <div className="w-full">
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50 mb-6">
+      <div className="bg-gradient-to-br from-white/90 via-white/80 to-purple-50/30 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-purple-950/30 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-2xl ring-1 ring-purple-200/30 dark:ring-purple-800/30 mb-6 border border-white/20 dark:border-slate-700/20">
         <div className="flex flex-wrap items-center gap-3">
           <button 
-            className="group px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-indigo-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+            className="group px-7 py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold shadow-xl hover:shadow-2xl ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center gap-2 hover:scale-105" 
             onClick={onPlay} 
             disabled={!strokes.length || playing}
           >
-            <span className="text-lg">▶️</span>
+            <span className="text-xl">▶️</span>
             <span>Play</span>
           </button>
           <button 
-            className="group px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl ring-1 ring-indigo-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+            className="group px-7 py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white font-semibold shadow-xl hover:shadow-2xl ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center gap-2 hover:scale-105" 
             onClick={onPause} 
             disabled={!strokes.length || !playing}
           >
-            <span className="text-lg">⏸️</span>
+            <span className="text-xl">⏸️</span>
             <span>Pause</span>
           </button>
           <button 
-            className="px-6 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium shadow-md hover:shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+            className="px-7 py-3.5 rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-slate-700 dark:text-slate-200 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-700 dark:hover:to-slate-600 font-semibold shadow-lg hover:shadow-xl ring-1 ring-slate-300 dark:ring-slate-600 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-2 hover:scale-105" 
             onClick={onRestart} 
             disabled={!strokes.length}
           >
-            <span className="text-lg">⏮️</span>
+            <span className="text-xl">⏮️</span>
             <span>Restart</span>
           </button>
           {strokes.length > 0 && (
-            <div className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-900">
-              <span className="text-sm font-medium">Duration:</span>
-              <span className="text-sm font-semibold">{(totalDur / 1000).toFixed(2)}s</span>
+            <div className="ml-auto flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-800 shadow-lg">
+              <span className="text-sm font-semibold">Duration:</span>
+              <span className="text-sm font-bold">{(totalDur / 1000).toFixed(2)}s</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className={`rounded-2xl overflow-hidden shadow-xl ring-1 ${
+      <div className={`rounded-3xl overflow-hidden shadow-2xl ring-2 ${
         isWhite 
           ? "bg-slate-900 ring-slate-700" 
-          : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl ring-slate-200/50 dark:ring-slate-800/50"
+          : "bg-gradient-to-br from-white/90 to-purple-50/90 dark:from-slate-900/90 dark:to-purple-950/90 backdrop-blur-xl ring-purple-200/40 dark:ring-purple-800/40"
       }`}>
         <div className="h-[50vh] sm:h-[400px] lg:h-[600px] relative">
           {!strokes.length && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <div className="text-6xl mb-4">✍️</div>
-                <p className="text-slate-500 dark:text-slate-400 font-medium">Draw a signature to see the preview</p>
+              <div className="text-center space-y-4 px-4">
+                <div className="text-7xl mb-6 animate-float">✍️</div>
+                <p className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">Draw a signature to see the preview</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Your animated signature will appear here</p>
               </div>
             </div>
           )}

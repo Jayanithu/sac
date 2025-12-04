@@ -222,20 +222,20 @@ export default function CanvasSign({ onChange }: Props) {
 
   return (
     <div className="w-full">
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50 mb-6">
+      <div className="bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/30 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-indigo-950/30 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-2xl ring-1 ring-indigo-200/30 dark:ring-indigo-800/30 mb-6 border border-white/20 dark:border-slate-700/20">
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Colors</span>
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">Colors</span>
+              <div className="flex items-center gap-2.5 pl-3 border-l-2 border-gradient-to-b from-indigo-300 to-purple-300 dark:from-indigo-700 dark:to-purple-700">
                 {palette.map(c => (
                   <button 
                     key={c} 
                     aria-label={c} 
-                    className={`h-8 w-8 rounded-full ring-2 transition-all duration-200 hover:scale-110 hover:ring-offset-2 ${
+                    className={`h-9 w-9 rounded-full ring-2 transition-all duration-300 hover:scale-125 ${
                       color === c 
-                        ? 'ring-indigo-500 dark:ring-indigo-400 ring-offset-2 shadow-lg scale-110' 
-                        : 'ring-slate-300 dark:ring-slate-600 hover:ring-slate-400 dark:hover:ring-slate-500'
+                        ? 'ring-indigo-500 dark:ring-indigo-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-xl scale-110' 
+                        : 'ring-slate-300 dark:ring-slate-600 hover:ring-indigo-400 dark:hover:ring-indigo-500 shadow-md hover:shadow-lg'
                     }`}
                     style={{ background: c }}
                     onClick={() => setColor(c)}
@@ -243,42 +243,42 @@ export default function CanvasSign({ onChange }: Props) {
                 ))}
               </div>
             </div>
-            <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-slate-300 dark:hover:ring-slate-600 transition-colors">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Custom</span>
-              <input className="h-8 w-12 rounded cursor-pointer" type="color" value={color} onChange={e => setColor(e.target.value)} />
+            <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 ring-1 ring-indigo-200 dark:ring-indigo-800 hover:ring-indigo-300 dark:hover:ring-indigo-700 transition-all hover:shadow-lg cursor-pointer">
+              <span className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">Custom</span>
+              <input className="h-8 w-14 rounded-lg cursor-pointer ring-2 ring-indigo-200 dark:ring-indigo-800" type="color" value={color} onChange={e => setColor(e.target.value)} />
             </label>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-3 flex-1 min-w-[200px]">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Width</span>
+              <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent whitespace-nowrap">Width</span>
               <input 
-                className="h-2 flex-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                className="h-3 flex-1 rounded-lg appearance-none cursor-pointer" 
                 type="range" 
                 min={1} 
                 max={20} 
                 value={width} 
                 onChange={e => setWidth(Number(e.target.value))} 
               />
-              <span className="text-sm text-slate-600 dark:text-slate-400 w-8 text-right">{width}px</span>
+              <span className="text-sm font-semibold text-purple-600 dark:text-purple-400 w-10 text-right px-2 py-1 bg-purple-50 dark:bg-purple-950/30 rounded-lg">{width}px</span>
             </label>
             
-            <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            <div className="flex items-center gap-1.5 p-1.5 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 rounded-xl shadow-inner">
               <button 
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
                   mode === 'draw'
-                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-slate-200 dark:ring-slate-600' 
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg ring-2 ring-white/50 scale-105' 
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50'
                 }`} 
                 onClick={() => setMode('draw')}
               >
                 ✏️ Draw
               </button>
               <button 
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
                   mode === 'erase'
-                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-slate-200 dark:ring-slate-600' 
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg ring-2 ring-white/50 scale-105' 
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50'
                 }`} 
                 onClick={() => setMode('erase')}
               >
@@ -287,9 +287,9 @@ export default function CanvasSign({ onChange }: Props) {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Zoom</span>
+              <span className="text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">Zoom</span>
               <input 
-                className="h-2 w-24 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                className="h-3 w-28 rounded-lg appearance-none cursor-pointer" 
                 type="range" 
                 min={0.5} 
                 max={3} 
@@ -297,9 +297,9 @@ export default function CanvasSign({ onChange }: Props) {
                 value={zoom} 
                 onChange={e => setZoom(Number(e.target.value))} 
               />
-              <span className="text-sm text-slate-600 dark:text-slate-400 w-12 text-right">{Math.round(zoom * 100)}%</span>
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 w-14 text-center px-2 py-1 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg">{Math.round(zoom * 100)}%</span>
               <button 
-                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200 dark:ring-slate-700 transition-colors" 
+                className="px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl ring-1 ring-white/20 transition-all hover:scale-105" 
                 onClick={() => { setZoom(1); setPan({x:0,y:0}); }}
               >
                 Reset
@@ -307,23 +307,23 @@ export default function CanvasSign({ onChange }: Props) {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gradient-to-r from-indigo-200 to-purple-200 dark:from-indigo-800 dark:to-purple-800">
             <button 
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200 dark:ring-slate-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 shadow-lg hover:shadow-xl ring-1 ring-white/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-2 hover:scale-105" 
               onClick={undo} 
               disabled={!strokes.length}
             >
               <span>↶</span> Undo
             </button>
             <button 
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200 dark:ring-slate-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 shadow-lg hover:shadow-xl ring-1 ring-white/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-2 hover:scale-105" 
               onClick={redo} 
               disabled={!undone.length}
             >
               <span>↷</span> Redo
             </button>
             <button 
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 ring-1 ring-red-200 dark:ring-red-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 shadow-lg hover:shadow-xl ring-1 ring-white/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-2 hover:scale-105" 
               onClick={clearAll} 
               disabled={!strokes.length}
             >
@@ -333,43 +333,43 @@ export default function CanvasSign({ onChange }: Props) {
         </div>
       </div>
 
-      <div className={`rounded-2xl overflow-hidden shadow-xl ring-1 ${
+      <div className={`rounded-3xl overflow-hidden shadow-2xl ring-2 ${
         isWhite 
           ? "bg-slate-900 ring-slate-700" 
-          : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl ring-slate-200/50 dark:ring-slate-800/50"
+          : "bg-gradient-to-br from-white/90 to-slate-50/90 dark:from-slate-900/90 dark:to-slate-950/90 backdrop-blur-xl ring-indigo-200/40 dark:ring-indigo-800/40"
       }`}>
         <div className="relative h-[50vh] sm:h-[400px] lg:h-[600px]">
-          <div className={`absolute top-4 left-4 z-10 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${
+          <div className={`absolute top-4 left-4 z-10 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md flex items-center gap-2 ${
             drawing 
-              ? 'bg-red-500/90 text-white shadow-lg ring-2 ring-red-400/50 animate-pulse' 
-              : 'bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700'
+              ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-xl ring-2 ring-red-300/50 animate-pulse' 
+              : 'bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700 shadow-lg'
           }`}>
-            {drawing ? '● Recording' : '○ Idle'}
+            {drawing ? <><span className="animate-pulse">●</span> Recording</> : <><span>○</span> Idle</>}
           </div>
           <canvas ref={canvasRef} className="w-full h-full cursor-crosshair" style={{ touchAction: "none" }} />
         </div>
       </div>
 
       {strokes.length > 0 && (
-        <div className="mt-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-800/50">
+        <div className="mt-6 bg-gradient-to-br from-white/90 via-purple-50/40 to-pink-50/40 dark:from-slate-900/90 dark:via-purple-950/20 dark:to-pink-950/20 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-2xl ring-1 ring-purple-200/30 dark:ring-purple-800/30 border border-white/20 dark:border-slate-700/20">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">🎨</span>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Edit Individual Strokes</h3>
-            <span className="text-xs text-slate-500 dark:text-slate-400 ml-auto">({strokes.length} stroke{strokes.length !== 1 ? 's' : ''})</span>
+            <span className="text-xl">🎨</span>
+            <h3 className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">Edit Individual Strokes</h3>
+            <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 ml-auto px-3 py-1 bg-purple-100 dark:bg-purple-950/40 rounded-full">({strokes.length} stroke{strokes.length !== 1 ? 's' : ''})</span>
           </div>
           <div className="overflow-x-auto pb-2">
             <div className="flex items-center gap-3 min-w-max">
               {strokes.map((s, i) => (
                 <div 
                   key={i} 
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-slate-300 dark:hover:ring-slate-600 hover:shadow-md transition-all"
+                  className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-gradient-to-br from-white to-purple-50/50 dark:from-slate-800/80 dark:to-purple-950/30 ring-1 ring-purple-200 dark:ring-purple-800 hover:ring-purple-300 dark:hover:ring-purple-700 hover:shadow-xl transition-all hover:scale-105"
                 >
-                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-1 rounded">#{i+1}</span>
+                  <span className="text-xs font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1.5 rounded-lg shadow-lg">#{i+1}</span>
                   <input 
                     type="color" 
                     value={s.color} 
                     onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, color: e.target.value } : ss))}
-                    className="h-8 w-12 rounded cursor-pointer ring-1 ring-slate-200 dark:ring-slate-700"
+                    className="h-9 w-14 rounded-lg cursor-pointer ring-2 ring-purple-200 dark:ring-purple-800 hover:ring-purple-300 dark:hover:ring-purple-700 transition-all"
                   />
                   <div className="flex items-center gap-2">
                     <input 
@@ -378,12 +378,12 @@ export default function CanvasSign({ onChange }: Props) {
                       max={20} 
                       value={s.width} 
                       onChange={e => setStrokes(prev => prev.map((ss, idx) => idx===i ? { ...ss, width: Number(e.target.value) } : ss))}
-                      className="h-2 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                      className="h-3 w-24 rounded-lg appearance-none cursor-pointer"
                     />
-                    <span className="text-xs text-slate-600 dark:text-slate-400 w-6">{s.width}</span>
+                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 w-8 px-2 py-1 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">{s.width}</span>
                   </div>
                   <button 
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 ring-1 ring-red-200 dark:ring-red-900 transition-colors" 
+                    className="px-3 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 shadow-lg hover:shadow-xl ring-1 ring-white/20 transition-all hover:scale-110" 
                     onClick={() => setStrokes(prev => prev.filter((_, idx) => idx !== i))}
                   >
                     🗑️

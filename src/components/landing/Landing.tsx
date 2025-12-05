@@ -45,7 +45,7 @@ export default function Landing({ onEnter }: Props) {
           >
             <BlurredStagger 
               text="sac" 
-              className="text-6xl xs:text-7xl sm:text-8xl md:text-9xl lg:text-[11rem] xl:text-[13rem] font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent tracking-tight inline-block leading-none animate-gradient"
+              className="text-6xl xs:text-7xl sm:text-8xl md:text-9xl lg:text-[11rem] xl:text-[13rem] font-bold text-black dark:text-indigo-400 tracking-tight inline-block leading-none"
             />
           </motion.div>
           <motion.p 

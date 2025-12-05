@@ -102,52 +102,52 @@ export default function ExportButtons({ strokes }: Props) {
 
   return (
     <div className="w-full">
-      <div className="bg-gradient-to-br from-white/90 via-white/80 to-emerald-50/30 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-emerald-950/30 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl ring-1 ring-emerald-200/30 dark:ring-emerald-800/30 border border-white/20 dark:border-slate-700/20">
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent mb-2">Export Your Signature</h3>
-          <p className="text-slate-600 dark:text-slate-400 leading-relaxed">Choose your preferred format for web, video, or cross-platform use.</p>
+      <div className="bg-gradient-to-br from-white/90 via-white/80 to-emerald-50/30 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-emerald-950/30 backdrop-blur-xl rounded-2xl xs:rounded-3xl p-4 xs:p-5 sm:p-6 md:p-8 shadow-2xl ring-1 ring-emerald-200/30 dark:ring-emerald-800/30 border border-white/20 dark:border-slate-700/20">
+        <div className="mb-4 xs:mb-5 sm:mb-6">
+          <h3 className="text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent mb-1.5 xs:mb-2">Export Your Signature</h3>
+          <p className="text-xs xs:text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">Choose your preferred format for web, video, or cross-platform use.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-          <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 mb-4 xs:mb-5 sm:mb-6">
+          <div className="flex flex-col gap-2 xs:gap-3">
             <button 
-              className="group relative px-6 py-5 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:via-emerald-700 hover:to-teal-700 text-white font-semibold shadow-2xl hover:shadow-emerald-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden hover:scale-105" 
+              className="group relative px-4 xs:px-5 sm:px-6 py-4 xs:py-4.5 sm:py-5 rounded-xl xs:rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:via-emerald-700 hover:to-teal-700 text-white font-semibold shadow-2xl hover:shadow-emerald-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden active:scale-95 touch-manipulation" 
               onClick={onExportSVG} 
               disabled={!strokes.length || !!loading.svg}
             >
-              <div className="relative z-10 flex flex-col items-center gap-3">
-                <span className="text-4xl drop-shadow-lg">📄</span>
-                <span className="text-base font-bold tracking-wide">{loading.svg ? "Exporting..." : "Export SVG"}</span>
+              <div className="relative z-10 flex flex-col items-center gap-2 xs:gap-3">
+                <span className="text-3xl xs:text-4xl drop-shadow-lg">📄</span>
+                <span className="text-sm xs:text-base font-bold tracking-wide">{loading.svg ? "Exporting..." : "Export SVG"}</span>
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-300/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
             </button>
             <BackgroundSelector value={bgSvg} onChange={setBgSvg} show={showBgSvg} onToggle={() => setShowBgSvg(!showBgSvg)} />
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 xs:gap-3">
             <button 
-              className="group relative px-6 py-5 rounded-2xl bg-gradient-to-br from-fuchsia-500 via-fuchsia-600 to-pink-600 hover:from-fuchsia-600 hover:via-fuchsia-700 hover:to-pink-700 text-white font-semibold shadow-2xl hover:shadow-fuchsia-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden hover:scale-105" 
+              className="group relative px-4 xs:px-5 sm:px-6 py-4 xs:py-4.5 sm:py-5 rounded-xl xs:rounded-2xl bg-gradient-to-br from-fuchsia-500 via-fuchsia-600 to-pink-600 hover:from-fuchsia-600 hover:via-fuchsia-700 hover:to-pink-700 text-white font-semibold shadow-2xl hover:shadow-fuchsia-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden active:scale-95 touch-manipulation" 
               onClick={onExportVideo} 
               disabled={!strokes.length || !!loading.video}
             >
-              <div className="relative z-10 flex flex-col items-center gap-3">
-                <span className="text-4xl drop-shadow-lg">🎬</span>
-                <span className="text-base font-bold tracking-wide">{loading.video ? "Exporting..." : "Export MP4"}</span>
+              <div className="relative z-10 flex flex-col items-center gap-2 xs:gap-3">
+                <span className="text-3xl xs:text-4xl drop-shadow-lg">🎬</span>
+                <span className="text-sm xs:text-base font-bold tracking-wide">{loading.video ? "Exporting..." : "Export MP4"}</span>
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-300/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
             </button>
             <BackgroundSelector value={bgVideo} onChange={setBgVideo} show={showBgVideo} onToggle={() => setShowBgVideo(!showBgVideo)} />
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 xs:gap-3 xs:col-span-2 sm:col-span-1">
             <button 
-              className="group relative px-6 py-5 rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-600 hover:from-blue-600 hover:via-blue-700 hover:to-cyan-700 text-white font-semibold shadow-2xl hover:shadow-blue-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden hover:scale-105" 
+              className="group relative px-4 xs:px-5 sm:px-6 py-4 xs:py-4.5 sm:py-5 rounded-xl xs:rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-600 hover:from-blue-600 hover:via-blue-700 hover:to-cyan-700 text-white font-semibold shadow-2xl hover:shadow-blue-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden active:scale-95 touch-manipulation" 
               onClick={onExportLottie} 
               disabled={!strokes.length || !!loading.lottie}
             >
-              <div className="relative z-10 flex flex-col items-center gap-3">
-                <span className="text-4xl drop-shadow-lg">🎨</span>
-                <span className="text-base font-bold tracking-wide">{loading.lottie ? "Exporting..." : "Export Lottie"}</span>
+              <div className="relative z-10 flex flex-col items-center gap-2 xs:gap-3">
+                <span className="text-3xl xs:text-4xl drop-shadow-lg">🎨</span>
+                <span className="text-sm xs:text-base font-bold tracking-wide">{loading.lottie ? "Exporting..." : "Export Lottie"}</span>
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-blue-300/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
             </button>
@@ -156,13 +156,13 @@ export default function ExportButtons({ strokes }: Props) {
         </div>
 
         {strokes.length > 0 && (
-          <div className="pt-6 border-t border-gradient-to-r from-emerald-200 to-cyan-200 dark:from-emerald-800 dark:to-cyan-800">
-            <div className="flex flex-wrap items-center gap-4 text-sm">
-              <div className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50 ring-1 ring-emerald-200 dark:ring-emerald-800 shadow-lg">
+          <div className="pt-4 xs:pt-5 sm:pt-6 border-t border-gradient-to-r from-emerald-200 to-cyan-200 dark:from-emerald-800 dark:to-cyan-800">
+            <div className="flex flex-col xs:flex-row flex-wrap items-stretch xs:items-center gap-3 xs:gap-4 text-xs xs:text-sm">
+              <div className="flex items-center justify-center xs:justify-start gap-2 px-4 xs:px-5 py-2.5 xs:py-3 rounded-lg xs:rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50 ring-1 ring-emerald-200 dark:ring-emerald-800 shadow-lg">
                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">⏱️ Duration:</span>
                 <span className="font-bold text-emerald-700 dark:text-emerald-300">{(durMs / 1000).toFixed(2)}s</span>
               </div>
-              <div className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50 ring-1 ring-cyan-200 dark:ring-cyan-800 shadow-lg">
+              <div className="flex items-center justify-center xs:justify-start gap-2 px-4 xs:px-5 py-2.5 xs:py-3 rounded-lg xs:rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50 ring-1 ring-cyan-200 dark:ring-cyan-800 shadow-lg">
                 <span className="text-cyan-600 dark:text-cyan-400 font-medium">📏 Dimensions:</span>
                 <span className="font-bold text-cyan-700 dark:text-cyan-300">{Math.round(b.width)} × {Math.round(b.height)}px</span>
               </div>
@@ -170,8 +170,8 @@ export default function ExportButtons({ strokes }: Props) {
           </div>
         )}
 
-        <p className="mt-6 text-sm text-slate-600 dark:text-slate-400 flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-50/50 to-cyan-50/50 dark:from-blue-950/20 dark:to-cyan-950/20 ring-1 ring-blue-200/50 dark:ring-blue-800/50">
-          <span className="text-xl">ℹ️</span>
+        <p className="mt-4 xs:mt-5 sm:mt-6 text-xs xs:text-sm text-slate-600 dark:text-slate-400 flex items-start gap-2 xs:gap-3 p-3 xs:p-4 rounded-lg xs:rounded-xl bg-gradient-to-r from-blue-50/50 to-cyan-50/50 dark:from-blue-950/20 dark:to-cyan-950/20 ring-1 ring-blue-200/50 dark:ring-blue-800/50">
+          <span className="text-lg xs:text-xl flex-shrink-0">ℹ️</span>
           <span>Video export uses your browser's encoder. Some browsers may export as WebM format instead of MP4.</span>
         </p>
       </div>

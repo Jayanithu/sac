@@ -208,3 +208,63 @@ export const recordAnimationToVideo = async (strokes: Stroke[], width: number, h
   requestAnimationFrame(drawFrame);
   return promise;
 };
+
+export const exportToPNG = (strokes: Stroke[], background: BackgroundOption = 'transparent'): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    if (!strokes.length) {
+      reject(new Error("No strokes to export"));
+      return;
+    }
+
+    const b = getBounds(strokes);
+    const canvas = document.createElement("canvas");
+    const padding = 10;
+    canvas.width = Math.round(b.width + padding * 2);
+    canvas.height = Math.round(b.height + padding * 2);
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      reject(new Error("Cannot get 2D context"));
+      return;
+    }
+
+    // Apply background
+    if (background === 'white') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else if (background === 'black') {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Draw all strokes
+    const offsetX = -b.minX + padding;
+    const offsetY = -b.minY + padding;
+    
+    for (const stroke of strokes) {
+      if (!stroke.points.length) continue;
+      
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.width;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(stroke.points[0].x + offsetX, stroke.points[0].y + offsetY);
+      
+      for (let i = 1; i < stroke.points.length; i++) {
+        ctx.lineTo(stroke.points[i].x + offsetX, stroke.points[i].y + offsetY);
+      }
+      
+      ctx.stroke();
+    }
+
+    // Convert to blob
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("Failed to create PNG blob"));
+      }
+    }, 'image/png');
+  });
+};

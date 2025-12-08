@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import type { Stroke, BackgroundOption } from "../../types";
 import { getBounds, totalDurationMs } from "../../lib/pathUtils";
-import { buildAnimatedSVG, buildLottieJSON, recordAnimationToVideo } from "../../lib/exportUtils";
+import { buildAnimatedSVG, buildLottieJSON, recordAnimationToVideo, exportToPNG } from "../../lib/exportUtils";
 
 type Props = { strokes: Stroke[] };
 
@@ -14,13 +14,15 @@ const download = (name: string, data: Blob | string, type?: string) => {
 };
 
 export default function ExportButtons({ strokes }: Props) {
-  const [loading, setLoading] = useState<{ svg?: boolean; video?: boolean; lottie?: boolean }>({});
+  const [loading, setLoading] = useState<{ svg?: boolean; video?: boolean; lottie?: boolean; png?: boolean }>({});
   const [bgSvg, setBgSvg] = useState<BackgroundOption>('transparent');
   const [bgVideo, setBgVideo] = useState<BackgroundOption>('transparent');
   const [bgLottie, setBgLottie] = useState<BackgroundOption>('transparent');
+  const [bgPng, setBgPng] = useState<BackgroundOption>('white');
   const [showBgSvg, setShowBgSvg] = useState(false);
   const [showBgVideo, setShowBgVideo] = useState(false);
   const [showBgLottie, setShowBgLottie] = useState(false);
+  const [showBgPng, setShowBgPng] = useState(false);
   const b = useMemo(() => getBounds(strokes), [strokes]);
   const durMs = useMemo(() => totalDurationMs(strokes) || 1, [strokes]);
 
@@ -53,6 +55,19 @@ export default function ExportButtons({ strokes }: Props) {
     download("signature.json", JSON.stringify(json), "application/json");
     setLoading(s => ({ ...s, lottie: false }));
     setShowBgLottie(false);
+  };
+
+  const onExportPNG = async () => {
+    setLoading(s => ({ ...s, png: true }));
+    try {
+      const blob = await exportToPNG(strokes, bgPng);
+      download("signature.png", blob);
+    } catch (e: any) {
+      alert(e?.message || "PNG export failed.");
+    } finally {
+      setLoading(s => ({ ...s, png: false }));
+      setShowBgPng(false);
+    }
   };
 
   const BackgroundSelector = ({ 
@@ -108,7 +123,7 @@ export default function ExportButtons({ strokes }: Props) {
           <p className="text-xs xs:text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">Choose your preferred format for web, video, or cross-platform use.</p>
         </div>
 
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 mb-4 xs:mb-5 sm:mb-6">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-5 mb-4 xs:mb-5 sm:mb-6">
           <div className="flex flex-col gap-2 xs:gap-3">
             <button 
               className="group relative px-4 xs:px-5 sm:px-6 py-4 xs:py-4.5 sm:py-5 rounded-xl xs:rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:via-emerald-700 hover:to-teal-700 text-white font-semibold shadow-2xl hover:shadow-emerald-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden active:scale-95 touch-manipulation" 
@@ -139,7 +154,7 @@ export default function ExportButtons({ strokes }: Props) {
             <BackgroundSelector value={bgVideo} onChange={setBgVideo} show={showBgVideo} onToggle={() => setShowBgVideo(!showBgVideo)} />
           </div>
 
-          <div className="flex flex-col gap-2 xs:gap-3 xs:col-span-2 sm:col-span-1">
+          <div className="flex flex-col gap-2 xs:gap-3">
             <button 
               className="group relative px-4 xs:px-5 sm:px-6 py-4 xs:py-4.5 sm:py-5 rounded-xl xs:rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-600 hover:from-blue-600 hover:via-blue-700 hover:to-cyan-700 text-white font-semibold shadow-2xl hover:shadow-blue-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden active:scale-95 touch-manipulation" 
               onClick={onExportLottie} 
@@ -152,6 +167,21 @@ export default function ExportButtons({ strokes }: Props) {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-300/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
             </button>
             <BackgroundSelector value={bgLottie} onChange={setBgLottie} show={showBgLottie} onToggle={() => setShowBgLottie(!showBgLottie)} />
+          </div>
+
+          <div className="flex flex-col gap-2 xs:gap-3 xs:col-span-2 sm:col-span-2 lg:col-span-1">
+            <button 
+              className="group relative px-4 xs:px-5 sm:px-6 py-4 xs:py-4.5 sm:py-5 rounded-xl xs:rounded-2xl bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-600 hover:from-violet-600 hover:via-purple-700 hover:to-indigo-700 text-white font-semibold shadow-2xl hover:shadow-purple-500/50 ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden active:scale-95 touch-manipulation" 
+              onClick={onExportPNG} 
+              disabled={!strokes.length || !!loading.png}
+            >
+              <div className="relative z-10 flex flex-col items-center gap-2 xs:gap-3">
+                <span className="text-3xl xs:text-4xl drop-shadow-lg">🖼️</span>
+                <span className="text-sm xs:text-base font-bold tracking-wide">{loading.png ? "Exporting..." : "Export PNG"}</span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-300/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
+            </button>
+            <BackgroundSelector value={bgPng} onChange={setBgPng} show={showBgPng} onToggle={() => setShowBgPng(!showBgPng)} />
           </div>
         </div>
 

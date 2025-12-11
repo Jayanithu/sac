@@ -17,9 +17,13 @@ export default function CanvasSign({ onChange }: Props) {
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [pan, setPan] = useState<{x:number;y:number}>({ x: 0, y: 0 });
   const [shiftDown, setShiftDown] = useState(false);
+  const [trackpadMode, setTrackpadMode] = useState(false);
   const palette = COLOR_PALETTE;
   const startRef = useRef<number | null>(null);
   const currentStrokeRef = useRef<Stroke | null>(null);
+  const lastMoveTimeRef = useRef<number>(0);
+  const trackpadMoveCountRef = useRef<number>(0);
+  const trackpadStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const hitStroke = (s: Stroke, x: number, y: number, tol: number) => {
     if (!s.points.length) return false;
@@ -177,6 +181,42 @@ export default function CanvasSign({ onChange }: Props) {
         applyEraseAt(x, y, zoom);
         return;
       }
+      
+      const now = performance.now();
+      const timeSinceLastMove = now - lastMoveTimeRef.current;
+      lastMoveTimeRef.current = now;
+      
+      if (trackpadMode && !drawing && e.pointerType === 'mouse') {
+        if (timeSinceLastMove < 150 || trackpadMoveCountRef.current > 0) {
+          trackpadMoveCountRef.current += 1;
+          if (trackpadMoveCountRef.current >= 1) {
+            if (trackpadStartTimeoutRef.current) {
+              clearTimeout(trackpadStartTimeoutRef.current);
+              trackpadStartTimeoutRef.current = null;
+            }
+            const dpr = window.devicePixelRatio || 1;
+            const scale = dpr * zoom;
+            const { x, y } = getPos(e);
+            setDrawing(true);
+            if (startRef.current == null) startRef.current = performance.now();
+            const t0 = performance.now() - (startRef.current ?? 0);
+            const s: Stroke = { points: [{ x, y, t: t0 }], color, width };
+            currentStrokeRef.current = s;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(1, width) * scale;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.beginPath();
+            ctx.moveTo(x * scale + pan.x * dpr, y * scale + pan.y * dpr);
+            return;
+          }
+        } else {
+          trackpadMoveCountRef.current = 0;
+        }
+      } else if (!trackpadMode) {
+        trackpadMoveCountRef.current = 0;
+      }
+      
       if (!drawing || !currentStrokeRef.current) return;
       const dpr = window.devicePixelRatio || 1;
       const scale = dpr * zoom;
@@ -197,11 +237,22 @@ export default function CanvasSign({ onChange }: Props) {
       const s = currentStrokeRef.current;
       currentStrokeRef.current = null;
       setDrawing(false);
+      trackpadMoveCountRef.current = 0;
+      if (trackpadStartTimeoutRef.current) {
+        clearTimeout(trackpadStartTimeoutRef.current);
+        trackpadStartTimeoutRef.current = null;
+      }
       setUndone([]);
       setStrokes(prev => [...prev, s]);
     };
     const onUp = () => endStroke();
-    const onLeave = () => endStroke();
+    const onLeave = () => {
+      if (trackpadMode && drawing) {
+        endStroke();
+      } else {
+        endStroke();
+      }
+    };
     canvas.addEventListener("pointerdown", onDown);
     canvas.addEventListener("pointermove", onMove);
     canvas.addEventListener("pointerup", onUp);
@@ -214,7 +265,7 @@ export default function CanvasSign({ onChange }: Props) {
       canvas.removeEventListener("pointercancel", onLeave);
       canvas.removeEventListener("pointerleave", onLeave);
     };
-  }, [color, width, drawing, zoom, pan, shiftDown, mode]);
+  }, [color, width, drawing, zoom, pan, shiftDown, mode, trackpadMode]);
 
   const clearAll = () => { setStrokes([]); setUndone([]); startRef.current = null; };
   const undo = () => setStrokes(prev => { if (!prev.length) return prev; const next = [...prev]; const last = next.pop()!; setUndone(u => [last, ...u]); return next; });
@@ -285,6 +336,34 @@ export default function CanvasSign({ onChange }: Props) {
                 🗑️ Erase
               </button>
             </div>
+
+            <button
+              className={`flex items-center gap-2 xs:gap-2.5 px-4 xs:px-5 py-2 xs:py-2.5 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-300 touch-manipulation ${
+                trackpadMode
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg ring-2 ring-white/50 hover:from-emerald-600 hover:to-teal-600'
+                  : 'bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-slate-700 dark:text-slate-300 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-700 dark:hover:to-slate-600 ring-1 ring-slate-300 dark:ring-slate-600'
+              }`}
+              onClick={() => {
+                setTrackpadMode(!trackpadMode);
+                if (drawing && currentStrokeRef.current) {
+                  const s = currentStrokeRef.current;
+                  currentStrokeRef.current = null;
+                  setDrawing(false);
+                  trackpadMoveCountRef.current = 0;
+                  if (trackpadStartTimeoutRef.current) {
+                    clearTimeout(trackpadStartTimeoutRef.current);
+                    trackpadStartTimeoutRef.current = null;
+                  }
+                  setUndone([]);
+                  setStrokes(prev => [...prev, s]);
+                }
+              }}
+              title="Enable trackpad mode - draw by moving mouse/trackpad without clicking"
+            >
+              <span className="text-base xs:text-lg">🖱️</span>
+              <span className="hidden xs:inline">{trackpadMode ? 'Trackpad Mode On' : 'Trackpad Mode Off'}</span>
+              <span className="xs:hidden">{trackpadMode ? 'On' : 'Off'}</span>
+            </button>
 
             <div className="flex flex-wrap items-center gap-2 xs:gap-3 w-full xs:w-auto">
               <span className="text-xs xs:text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">Zoom</span>

@@ -92,6 +92,14 @@ export default function Page() {
                   <span>Use touch or mouse to draw. Experiment with different colors and stroke widths for unique effects.</span>
                 </li>
                 <li className="flex items-start gap-2 xs:gap-3">
+                  <span className="text-emerald-500 dark:text-emerald-400 mt-0.5 xs:mt-1 text-base xs:text-lg flex-shrink-0">•</span>
+                  <span><strong>Trackpad Mode:</strong> Enable this feature to draw on your laptop trackpad without clicking. A 5-second countdown gives you time to position your hand before drawing starts automatically.</span>
+                </li>
+                <li className="flex items-start gap-2 xs:gap-3">
+                  <span className="text-amber-500 dark:text-amber-400 mt-0.5 xs:mt-1 text-base xs:text-lg flex-shrink-0">•</span>
+                  <span><strong>Auto-Stop Timer:</strong> Set a custom duration (1-300 seconds) and your drawing will automatically stop after the time expires. Perfect for timed signature challenges or consistent animation lengths.</span>
+                </li>
+                <li className="flex items-start gap-2 xs:gap-3">
                   <span className="text-purple-500 dark:text-purple-400 mt-0.5 xs:mt-1 text-base xs:text-lg flex-shrink-0">•</span>
                   <span>Playback speed matches your original drawing tempo for authentic signature animations.</span>
                 </li>

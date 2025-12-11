@@ -19,6 +19,9 @@ export default function CanvasSign({ onChange }: Props) {
   const [shiftDown, setShiftDown] = useState(false);
   const [trackpadMode, setTrackpadMode] = useState(false);
   const [trackpadCountdown, setTrackpadCountdown] = useState<number | null>(null);
+  const [autoStopEnabled, setAutoStopEnabled] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(10);
+  const [recordingTimeLeft, setRecordingTimeLeft] = useState<number | null>(null);
   const palette = COLOR_PALETTE;
   const startRef = useRef<number | null>(null);
   const currentStrokeRef = useRef<Stroke | null>(null);
@@ -26,6 +29,8 @@ export default function CanvasSign({ onChange }: Props) {
   const trackpadMoveCountRef = useRef<number>(0);
   const trackpadStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const trackpadCountdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoStopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoStopIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const hitStroke = (s: Stroke, x: number, y: number, tol: number) => {
     if (!s.points.length) return false;
@@ -98,6 +103,12 @@ export default function CanvasSign({ onChange }: Props) {
     return () => {
       if (trackpadCountdownIntervalRef.current) {
         clearInterval(trackpadCountdownIntervalRef.current);
+      }
+      if (autoStopTimerRef.current) {
+        clearTimeout(autoStopTimerRef.current);
+      }
+      if (autoStopIntervalRef.current) {
+        clearInterval(autoStopIntervalRef.current);
       }
     };
   }, []);
@@ -184,6 +195,34 @@ export default function CanvasSign({ onChange }: Props) {
       currentStrokeRef.current = s;
       ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, width * (e.pressure || 1)) * scale; ctx.lineCap = "round"; ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(x * scale + pan.x * dpr, y * scale + pan.y * dpr);
+      
+      if (autoStopEnabled && !autoStopTimerRef.current) {
+        setRecordingTimeLeft(recordingDuration);
+        autoStopTimerRef.current = setTimeout(() => {
+          if (currentStrokeRef.current) {
+            const s = currentStrokeRef.current;
+            currentStrokeRef.current = null;
+            setDrawing(false);
+            setUndone([]);
+            setStrokes(prev => [...prev, s]);
+          }
+          if (autoStopIntervalRef.current) {
+            clearInterval(autoStopIntervalRef.current);
+            autoStopIntervalRef.current = null;
+          }
+          autoStopTimerRef.current = null;
+          setRecordingTimeLeft(null);
+        }, recordingDuration * 1000);
+        
+        autoStopIntervalRef.current = setInterval(() => {
+          setRecordingTimeLeft(prev => {
+            if (prev === null || prev <= 1) {
+              return null;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
     };
     const onMove = (e: PointerEvent) => {
       if (mode === 'erase') {
@@ -218,6 +257,34 @@ export default function CanvasSign({ onChange }: Props) {
             ctx.lineJoin = "round";
             ctx.beginPath();
             ctx.moveTo(x * scale + pan.x * dpr, y * scale + pan.y * dpr);
+            
+            if (autoStopEnabled && !autoStopTimerRef.current) {
+              setRecordingTimeLeft(recordingDuration);
+              autoStopTimerRef.current = setTimeout(() => {
+                if (currentStrokeRef.current) {
+                  const s = currentStrokeRef.current;
+                  currentStrokeRef.current = null;
+                  setDrawing(false);
+                  setUndone([]);
+                  setStrokes(prev => [...prev, s]);
+                }
+                if (autoStopIntervalRef.current) {
+                  clearInterval(autoStopIntervalRef.current);
+                  autoStopIntervalRef.current = null;
+                }
+                autoStopTimerRef.current = null;
+                setRecordingTimeLeft(null);
+              }, recordingDuration * 1000);
+              
+              autoStopIntervalRef.current = setInterval(() => {
+                setRecordingTimeLeft(prev => {
+                  if (prev === null || prev <= 1) {
+                    return null;
+                  }
+                  return prev - 1;
+                });
+              }, 1000);
+            }
             return;
           }
         } else {
@@ -252,6 +319,15 @@ export default function CanvasSign({ onChange }: Props) {
         clearTimeout(trackpadStartTimeoutRef.current);
         trackpadStartTimeoutRef.current = null;
       }
+      if (autoStopTimerRef.current) {
+        clearTimeout(autoStopTimerRef.current);
+        autoStopTimerRef.current = null;
+      }
+      if (autoStopIntervalRef.current) {
+        clearInterval(autoStopIntervalRef.current);
+        autoStopIntervalRef.current = null;
+      }
+      setRecordingTimeLeft(null);
       setUndone([]);
       setStrokes(prev => [...prev, s]);
     };
@@ -347,80 +423,147 @@ export default function CanvasSign({ onChange }: Props) {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 xs:gap-3">
-              <span className="text-xs xs:text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent whitespace-nowrap hidden xs:inline">Trackpad</span>
-              <button
-                className={`relative flex items-center gap-2 xs:gap-3 px-4 xs:px-5 py-2 xs:py-2.5 rounded-full xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-300 touch-manipulation min-w-[100px] xs:min-w-[120px] ${
-                  trackpadMode && trackpadCountdown === null
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg ring-2 ring-emerald-300/50 dark:ring-emerald-700/50 hover:from-emerald-600 hover:to-teal-600'
-                    : trackpadCountdown !== null
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg ring-2 ring-amber-300/50 dark:ring-amber-700/50 animate-pulse'
-                    : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-300 hover:from-slate-300 hover:to-slate-400 dark:hover:from-slate-600 dark:hover:to-slate-500 ring-1 ring-slate-300 dark:ring-slate-600'
-                }`}
-                onClick={() => {
-                  if (trackpadMode) {
-                    setTrackpadMode(false);
-                    setTrackpadCountdown(null);
-                    if (trackpadCountdownIntervalRef.current) {
-                      clearInterval(trackpadCountdownIntervalRef.current);
-                      trackpadCountdownIntervalRef.current = null;
-                    }
-                    if (drawing && currentStrokeRef.current) {
-                      const s = currentStrokeRef.current;
-                      currentStrokeRef.current = null;
-                      setDrawing(false);
-                      trackpadMoveCountRef.current = 0;
-                      if (trackpadStartTimeoutRef.current) {
-                        clearTimeout(trackpadStartTimeoutRef.current);
-                        trackpadStartTimeoutRef.current = null;
-                      }
-                      setUndone([]);
-                      setStrokes(prev => [...prev, s]);
-                    }
-                  } else {
-                    setTrackpadCountdown(5);
-                    if (trackpadCountdownIntervalRef.current) {
-                      clearInterval(trackpadCountdownIntervalRef.current);
-                    }
-                    trackpadCountdownIntervalRef.current = setInterval(() => {
-                      setTrackpadCountdown(prev => {
-                        if (prev === null || prev <= 1) {
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3 xs:gap-4 w-full xs:w-auto">
+              <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 xs:gap-3 flex-1 p-2 xs:p-3 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg xs:rounded-xl ring-1 ring-emerald-200/50 dark:ring-emerald-800/50">
+                <div className="flex items-center gap-2 xs:gap-3 flex-1">
+                  <span className="text-xs xs:text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent whitespace-nowrap">Trackpad Mode</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className={`relative flex items-center gap-2 px-3 xs:px-4 py-1.5 xs:py-2 rounded-full text-xs xs:text-sm font-semibold transition-all duration-300 touch-manipulation min-w-[70px] xs:min-w-[80px] ${
+                        trackpadMode && trackpadCountdown === null
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg ring-2 ring-emerald-300/50 dark:ring-emerald-700/50 hover:from-emerald-600 hover:to-teal-600'
+                          : trackpadCountdown !== null
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg ring-2 ring-amber-300/50 dark:ring-amber-700/50 animate-pulse'
+                          : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-300 hover:from-slate-300 hover:to-slate-400 dark:hover:from-slate-600 dark:hover:to-slate-500 ring-1 ring-slate-300 dark:ring-slate-600'
+                      }`}
+                      onClick={() => {
+                        if (trackpadMode) {
+                          setTrackpadMode(false);
+                          setTrackpadCountdown(null);
                           if (trackpadCountdownIntervalRef.current) {
                             clearInterval(trackpadCountdownIntervalRef.current);
                             trackpadCountdownIntervalRef.current = null;
                           }
-                          setTrackpadMode(true);
-                          return null;
+                          if (drawing && currentStrokeRef.current) {
+                            const s = currentStrokeRef.current;
+                            currentStrokeRef.current = null;
+                            setDrawing(false);
+                            trackpadMoveCountRef.current = 0;
+                            if (trackpadStartTimeoutRef.current) {
+                              clearTimeout(trackpadStartTimeoutRef.current);
+                              trackpadStartTimeoutRef.current = null;
+                            }
+                            setUndone([]);
+                            setStrokes(prev => [...prev, s]);
+                          }
+                        } else {
+                          setTrackpadCountdown(5);
+                          if (trackpadCountdownIntervalRef.current) {
+                            clearInterval(trackpadCountdownIntervalRef.current);
+                          }
+                          trackpadCountdownIntervalRef.current = setInterval(() => {
+                            setTrackpadCountdown(prev => {
+                              if (prev === null || prev <= 1) {
+                                if (trackpadCountdownIntervalRef.current) {
+                                  clearInterval(trackpadCountdownIntervalRef.current);
+                                  trackpadCountdownIntervalRef.current = null;
+                                }
+                                setTrackpadMode(true);
+                                return null;
+                              }
+                              return prev - 1;
+                            });
+                          }, 1000);
                         }
-                        return prev - 1;
-                      });
-                    }, 1000);
-                  }
-                }}
-                title={trackpadCountdown !== null ? `Activating in ${trackpadCountdown}s...` : trackpadMode ? "Trackpad mode active - click to disable" : "Enable trackpad mode - draw by moving mouse/trackpad without clicking"}
-              >
-                <div className={`relative w-10 xs:w-12 h-5 xs:h-6 rounded-full transition-all duration-300 ${
-                  trackpadMode && trackpadCountdown === null
-                    ? 'bg-white/30'
-                    : trackpadCountdown !== null
-                    ? 'bg-white/30'
-                    : 'bg-slate-400 dark:bg-slate-500'
-                }`}>
-                  <div className={`absolute top-0.5 xs:top-1 left-0.5 xs:left-1 w-4 xs:w-5 h-4 xs:h-5 rounded-full bg-white shadow-lg transition-all duration-300 transform ${
-                    trackpadMode && trackpadCountdown === null
-                      ? 'translate-x-5 xs:translate-x-6'
-                      : trackpadCountdown !== null
-                      ? 'translate-x-5 xs:translate-x-6'
-                      : 'translate-x-0'
-                  }`} />
+                      }}
+                      title={trackpadCountdown !== null ? `Activating in ${trackpadCountdown}s...` : trackpadMode ? "Trackpad mode active - click to disable" : "Enable trackpad mode - draw by moving mouse/trackpad without clicking"}
+                    >
+                      <div className={`relative w-8 xs:w-10 h-4 xs:h-5 rounded-full transition-all duration-300 ${
+                        trackpadMode && trackpadCountdown === null
+                          ? 'bg-white/30'
+                          : trackpadCountdown !== null
+                          ? 'bg-white/30'
+                          : 'bg-slate-400 dark:bg-slate-500'
+                      }`}>
+                        <div className={`absolute top-0.5 xs:top-1 left-0.5 xs:left-1 w-3 xs:w-4 h-3 xs:h-4 rounded-full bg-white shadow-lg transition-all duration-300 transform ${
+                          trackpadMode && trackpadCountdown === null
+                            ? 'translate-x-4 xs:translate-x-5'
+                            : trackpadCountdown !== null
+                            ? 'translate-x-4 xs:translate-x-5'
+                            : 'translate-x-0'
+                        }`} />
+                      </div>
+                      <span className="text-[10px] xs:text-xs">{trackpadCountdown !== null ? `${trackpadCountdown}s` : trackpadMode ? 'On' : 'Off'}</span>
+                    </button>
+                  </div>
                 </div>
-                <span className="hidden xs:inline">
-                  {trackpadCountdown !== null ? `${trackpadCountdown}s` : trackpadMode ? 'On' : 'Off'}
-                </span>
-                <span className="xs:hidden">
-                  {trackpadCountdown !== null ? `${trackpadCountdown}` : trackpadMode ? '✓' : '○'}
-                </span>
-              </button>
+              </div>
+
+              <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 xs:gap-3 flex-1 p-2 xs:p-3 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-lg xs:rounded-xl ring-1 ring-amber-200/50 dark:ring-amber-800/50">
+                <div className="flex items-center gap-2 xs:gap-3 flex-1">
+                  <span className="text-xs xs:text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent whitespace-nowrap">Auto-Stop Timer</span>
+                  <div className="flex items-center gap-2 flex-1">
+                    <button
+                      className={`relative flex items-center gap-2 px-3 xs:px-4 py-1.5 xs:py-2 rounded-full text-xs xs:text-sm font-semibold transition-all duration-300 touch-manipulation min-w-[70px] xs:min-w-[80px] ${
+                        autoStopEnabled
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg ring-2 ring-amber-300/50 dark:ring-amber-700/50 hover:from-amber-600 hover:to-orange-600'
+                          : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-300 hover:from-slate-300 hover:to-slate-400 dark:hover:from-slate-600 dark:hover:to-slate-500 ring-1 ring-slate-300 dark:ring-slate-600'
+                      }`}
+                      onClick={() => {
+                        setAutoStopEnabled(!autoStopEnabled);
+                        if (autoStopEnabled) {
+                          if (autoStopTimerRef.current) {
+                            clearTimeout(autoStopTimerRef.current);
+                            autoStopTimerRef.current = null;
+                          }
+                          if (autoStopIntervalRef.current) {
+                            clearInterval(autoStopIntervalRef.current);
+                            autoStopIntervalRef.current = null;
+                          }
+                          setRecordingTimeLeft(null);
+                        }
+                      }}
+                      title={autoStopEnabled ? "Auto-stop timer enabled - drawing will stop automatically after set duration" : "Enable auto-stop timer - automatically stops drawing after set duration"}
+                    >
+                      <div className={`relative w-8 xs:w-10 h-4 xs:h-5 rounded-full transition-all duration-300 ${
+                        autoStopEnabled
+                          ? 'bg-white/30'
+                          : 'bg-slate-400 dark:bg-slate-500'
+                      }`}>
+                        <div className={`absolute top-0.5 xs:top-1 left-0.5 xs:left-1 w-3 xs:w-4 h-3 xs:h-4 rounded-full bg-white shadow-lg transition-all duration-300 transform ${
+                          autoStopEnabled
+                            ? 'translate-x-4 xs:translate-x-5'
+                            : 'translate-x-0'
+                        }`} />
+                      </div>
+                      <span className="text-[10px] xs:text-xs">{autoStopEnabled ? 'On' : 'Off'}</span>
+                    </button>
+                    {autoStopEnabled && (
+                      <>
+                        <input
+                          type="number"
+                          min={1}
+                          max={300}
+                          value={recordingDuration}
+                          onChange={(e) => {
+                            const val = Math.max(1, Math.min(300, Number(e.target.value)));
+                            setRecordingDuration(val);
+                          }}
+                          className="w-12 xs:w-16 px-2 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-1 ring-amber-300 dark:ring-amber-700 focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 outline-none"
+                          disabled={drawing}
+                        />
+                        <span className="text-xs xs:text-sm font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap">seconds</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {recordingTimeLeft !== null && recordingTimeLeft > 0 && (
+                  <div className="flex items-center gap-2 px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg ring-2 ring-amber-300/50 dark:ring-amber-700/50">
+                    <span className="text-xs xs:text-sm font-bold animate-pulse">⏱️</span>
+                    <span className="text-xs xs:text-sm font-bold">Stops in: {recordingTimeLeft}s</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 xs:gap-3 w-full xs:w-auto">

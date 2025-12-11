@@ -18,12 +18,14 @@ export default function CanvasSign({ onChange }: Props) {
   const [pan, setPan] = useState<{x:number;y:number}>({ x: 0, y: 0 });
   const [shiftDown, setShiftDown] = useState(false);
   const [trackpadMode, setTrackpadMode] = useState(false);
+  const [trackpadCountdown, setTrackpadCountdown] = useState<number | null>(null);
   const palette = COLOR_PALETTE;
   const startRef = useRef<number | null>(null);
   const currentStrokeRef = useRef<Stroke | null>(null);
   const lastMoveTimeRef = useRef<number>(0);
   const trackpadMoveCountRef = useRef<number>(0);
   const trackpadStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const trackpadCountdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const hitStroke = (s: Stroke, x: number, y: number, tol: number) => {
     if (!s.points.length) return false;
@@ -91,6 +93,14 @@ export default function CanvasSign({ onChange }: Props) {
   };
 
   useEffect(() => { onChange?.(strokes); }, [strokes, onChange]);
+
+  useEffect(() => {
+    return () => {
+      if (trackpadCountdownIntervalRef.current) {
+        clearInterval(trackpadCountdownIntervalRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => setShiftDown(e.shiftKey);
@@ -186,7 +196,7 @@ export default function CanvasSign({ onChange }: Props) {
       const timeSinceLastMove = now - lastMoveTimeRef.current;
       lastMoveTimeRef.current = now;
       
-      if (trackpadMode && !drawing && e.pointerType === 'mouse') {
+      if (trackpadMode && trackpadCountdown === null && !drawing && e.pointerType === 'mouse') {
         if (timeSinceLastMove < 150 || trackpadMoveCountRef.current > 0) {
           trackpadMoveCountRef.current += 1;
           if (trackpadMoveCountRef.current >= 1) {
@@ -337,33 +347,81 @@ export default function CanvasSign({ onChange }: Props) {
               </button>
             </div>
 
-            <button
-              className={`flex items-center gap-2 xs:gap-2.5 px-4 xs:px-5 py-2 xs:py-2.5 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-300 touch-manipulation ${
-                trackpadMode
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg ring-2 ring-white/50 hover:from-emerald-600 hover:to-teal-600'
-                  : 'bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-slate-700 dark:text-slate-300 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-700 dark:hover:to-slate-600 ring-1 ring-slate-300 dark:ring-slate-600'
-              }`}
-              onClick={() => {
-                setTrackpadMode(!trackpadMode);
-                if (drawing && currentStrokeRef.current) {
-                  const s = currentStrokeRef.current;
-                  currentStrokeRef.current = null;
-                  setDrawing(false);
-                  trackpadMoveCountRef.current = 0;
-                  if (trackpadStartTimeoutRef.current) {
-                    clearTimeout(trackpadStartTimeoutRef.current);
-                    trackpadStartTimeoutRef.current = null;
+            <div className="flex items-center gap-2 xs:gap-3">
+              <span className="text-xs xs:text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent whitespace-nowrap hidden xs:inline">Trackpad</span>
+              <button
+                className={`relative flex items-center gap-2 xs:gap-3 px-4 xs:px-5 py-2 xs:py-2.5 rounded-full xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-300 touch-manipulation min-w-[100px] xs:min-w-[120px] ${
+                  trackpadMode && trackpadCountdown === null
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg ring-2 ring-emerald-300/50 dark:ring-emerald-700/50 hover:from-emerald-600 hover:to-teal-600'
+                    : trackpadCountdown !== null
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg ring-2 ring-amber-300/50 dark:ring-amber-700/50 animate-pulse'
+                    : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-300 hover:from-slate-300 hover:to-slate-400 dark:hover:from-slate-600 dark:hover:to-slate-500 ring-1 ring-slate-300 dark:ring-slate-600'
+                }`}
+                onClick={() => {
+                  if (trackpadMode) {
+                    setTrackpadMode(false);
+                    setTrackpadCountdown(null);
+                    if (trackpadCountdownIntervalRef.current) {
+                      clearInterval(trackpadCountdownIntervalRef.current);
+                      trackpadCountdownIntervalRef.current = null;
+                    }
+                    if (drawing && currentStrokeRef.current) {
+                      const s = currentStrokeRef.current;
+                      currentStrokeRef.current = null;
+                      setDrawing(false);
+                      trackpadMoveCountRef.current = 0;
+                      if (trackpadStartTimeoutRef.current) {
+                        clearTimeout(trackpadStartTimeoutRef.current);
+                        trackpadStartTimeoutRef.current = null;
+                      }
+                      setUndone([]);
+                      setStrokes(prev => [...prev, s]);
+                    }
+                  } else {
+                    setTrackpadCountdown(5);
+                    if (trackpadCountdownIntervalRef.current) {
+                      clearInterval(trackpadCountdownIntervalRef.current);
+                    }
+                    trackpadCountdownIntervalRef.current = setInterval(() => {
+                      setTrackpadCountdown(prev => {
+                        if (prev === null || prev <= 1) {
+                          if (trackpadCountdownIntervalRef.current) {
+                            clearInterval(trackpadCountdownIntervalRef.current);
+                            trackpadCountdownIntervalRef.current = null;
+                          }
+                          setTrackpadMode(true);
+                          return null;
+                        }
+                        return prev - 1;
+                      });
+                    }, 1000);
                   }
-                  setUndone([]);
-                  setStrokes(prev => [...prev, s]);
-                }
-              }}
-              title="Enable trackpad mode - draw by moving mouse/trackpad without clicking"
-            >
-              <span className="text-base xs:text-lg">🖱️</span>
-              <span className="hidden xs:inline">{trackpadMode ? 'Trackpad Mode On' : 'Trackpad Mode Off'}</span>
-              <span className="xs:hidden">{trackpadMode ? 'On' : 'Off'}</span>
-            </button>
+                }}
+                title={trackpadCountdown !== null ? `Activating in ${trackpadCountdown}s...` : trackpadMode ? "Trackpad mode active - click to disable" : "Enable trackpad mode - draw by moving mouse/trackpad without clicking"}
+              >
+                <div className={`relative w-10 xs:w-12 h-5 xs:h-6 rounded-full transition-all duration-300 ${
+                  trackpadMode && trackpadCountdown === null
+                    ? 'bg-white/30'
+                    : trackpadCountdown !== null
+                    ? 'bg-white/30'
+                    : 'bg-slate-400 dark:bg-slate-500'
+                }`}>
+                  <div className={`absolute top-0.5 xs:top-1 left-0.5 xs:left-1 w-4 xs:w-5 h-4 xs:h-5 rounded-full bg-white shadow-lg transition-all duration-300 transform ${
+                    trackpadMode && trackpadCountdown === null
+                      ? 'translate-x-5 xs:translate-x-6'
+                      : trackpadCountdown !== null
+                      ? 'translate-x-5 xs:translate-x-6'
+                      : 'translate-x-0'
+                  }`} />
+                </div>
+                <span className="hidden xs:inline">
+                  {trackpadCountdown !== null ? `${trackpadCountdown}s` : trackpadMode ? 'On' : 'Off'}
+                </span>
+                <span className="xs:hidden">
+                  {trackpadCountdown !== null ? `${trackpadCountdown}` : trackpadMode ? '✓' : '○'}
+                </span>
+              </button>
+            </div>
 
             <div className="flex flex-wrap items-center gap-2 xs:gap-3 w-full xs:w-auto">
               <span className="text-xs xs:text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">Zoom</span>

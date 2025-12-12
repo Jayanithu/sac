@@ -107,3 +107,55 @@ export const partialStrokesUpToLength = (strokes: Stroke[], target: number): Str
   }
   return out;
 };
+
+// Compress stroke times to remove waiting gaps - only show active drawing time
+export const compressStrokeTimes = (strokes: Stroke[]): Stroke[] => {
+  if (!strokes.length) return strokes;
+  
+  // Collect all stroke start and end times
+  const strokeTimes: { start: number; end: number }[] = [];
+  for (const s of strokes) {
+    if (!s.points.length) continue;
+    const start = s.points[0].t;
+    const end = s.points[s.points.length - 1].t;
+    strokeTimes.push({ start, end });
+  }
+  
+  if (!strokeTimes.length) return strokes;
+  
+  // Calculate total active drawing time (sum of stroke durations)
+  let totalActiveTime = 0;
+  for (const { start, end } of strokeTimes) {
+    totalActiveTime += (end - start);
+  }
+  
+  if (totalActiveTime === 0) return strokes;
+  
+  // Compress timeline: map original times to compressed times
+  let compressedTime = 0;
+  const compressed: Stroke[] = [];
+  
+  for (let i = 0; i < strokes.length; i++) {
+    const s = strokes[i];
+    if (!s.points.length) {
+      compressed.push(s);
+      continue;
+    }
+    
+    const strokeStart = s.points[0].t;
+    const strokeEnd = s.points[s.points.length - 1].t;
+    const strokeDuration = strokeEnd - strokeStart;
+    
+    // Map points to compressed timeline
+    const compressedPoints: Point[] = s.points.map(p => {
+      const relativeTime = (p.t - strokeStart) / Math.max(1, strokeDuration);
+      const newTime = compressedTime + relativeTime * strokeDuration;
+      return { ...p, t: newTime };
+    });
+    
+    compressed.push({ ...s, points: compressedPoints });
+    compressedTime += strokeDuration;
+  }
+  
+  return compressed;
+};

@@ -22,6 +22,7 @@ export default function CanvasSign({ onChange }: Props) {
   const [autoStopEnabled, setAutoStopEnabled] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(10);
   const [recordingTimeLeft, setRecordingTimeLeft] = useState<number | null>(null);
+  const [autoStopExpired, setAutoStopExpired] = useState(false);
   const palette = COLOR_PALETTE;
   const startRef = useRef<number | null>(null);
   const currentStrokeRef = useRef<Stroke | null>(null);
@@ -31,6 +32,8 @@ export default function CanvasSign({ onChange }: Props) {
   const trackpadCountdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const autoStopTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoStopIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const activePointerIdsRef = useRef<Set<number>>(new Set());
+  const autoStopExpiredRef = useRef<boolean>(false);
 
   const hitStroke = (s: Stroke, x: number, y: number, tol: number) => {
     if (!s.points.length) return false;
@@ -178,16 +181,25 @@ export default function CanvasSign({ onChange }: Props) {
     const ctx = canvas.getContext("2d")!;
     const onDown = (e: PointerEvent) => {
       e.preventDefault();
+      
       const dpr = window.devicePixelRatio || 1;
       const scale = dpr * zoom;
       const { x, y } = getPos(e);
       if (mode === 'erase') {
         canvas.setPointerCapture(e.pointerId);
+        activePointerIdsRef.current.add(e.pointerId);
         applyEraseAt(x, y, zoom);
         return;
       }
 
+      // Reset expired flag when user explicitly clicks to start drawing
+      if (autoStopExpiredRef.current) {
+        autoStopExpiredRef.current = false;
+        setAutoStopExpired(false);
+      }
+
       canvas.setPointerCapture(e.pointerId);
+      activePointerIdsRef.current.add(e.pointerId);
       setDrawing(true);
       if (startRef.current == null) startRef.current = performance.now();
       const t0 = performance.now() - (startRef.current ?? 0);
@@ -199,6 +211,19 @@ export default function CanvasSign({ onChange }: Props) {
       if (autoStopEnabled && !autoStopTimerRef.current) {
         setRecordingTimeLeft(recordingDuration);
         autoStopTimerRef.current = setTimeout(() => {
+          const canvas = canvasRef.current;
+          if (canvas) {
+            // Release all active pointer captures
+            activePointerIdsRef.current.forEach(pointerId => {
+              try {
+                canvas.releasePointerCapture(pointerId);
+              } catch (e) {
+                // Ignore errors if pointer is already released
+              }
+            });
+            activePointerIdsRef.current.clear();
+          }
+          
           if (currentStrokeRef.current) {
             const s = currentStrokeRef.current;
             currentStrokeRef.current = null;
@@ -212,11 +237,17 @@ export default function CanvasSign({ onChange }: Props) {
           }
           autoStopTimerRef.current = null;
           setRecordingTimeLeft(null);
+          autoStopExpiredRef.current = true; // Mark as expired to prevent auto-restart
+          setAutoStopExpired(true); // Update state for UI
         }, recordingDuration * 1000);
         
         autoStopIntervalRef.current = setInterval(() => {
           setRecordingTimeLeft(prev => {
             if (prev === null || prev <= 1) {
+              if (autoStopIntervalRef.current) {
+                clearInterval(autoStopIntervalRef.current);
+                autoStopIntervalRef.current = null;
+              }
               return null;
             }
             return prev - 1;
@@ -225,6 +256,11 @@ export default function CanvasSign({ onChange }: Props) {
       }
     };
     const onMove = (e: PointerEvent) => {
+      // If auto-stop timer has expired, prevent drawing
+      if (autoStopExpiredRef.current) {
+        return;
+      }
+      
       if (mode === 'erase') {
         const { x, y } = getPos(e);
         applyEraseAt(x, y, zoom);
@@ -235,7 +271,7 @@ export default function CanvasSign({ onChange }: Props) {
       const timeSinceLastMove = now - lastMoveTimeRef.current;
       lastMoveTimeRef.current = now;
       
-      if (trackpadMode && trackpadCountdown === null && !drawing && e.pointerType === 'mouse') {
+      if (trackpadMode && trackpadCountdown === null && !drawing && e.pointerType === 'mouse' && !autoStopExpiredRef.current) {
         if (timeSinceLastMove < 150 || trackpadMoveCountRef.current > 0) {
           trackpadMoveCountRef.current += 1;
           if (trackpadMoveCountRef.current >= 1) {
@@ -259,8 +295,23 @@ export default function CanvasSign({ onChange }: Props) {
             ctx.moveTo(x * scale + pan.x * dpr, y * scale + pan.y * dpr);
             
             if (autoStopEnabled && !autoStopTimerRef.current) {
+              autoStopExpiredRef.current = false; // Reset expired flag when starting new drawing
+              setAutoStopExpired(false); // Reset state for UI
               setRecordingTimeLeft(recordingDuration);
               autoStopTimerRef.current = setTimeout(() => {
+                const canvas = canvasRef.current;
+                if (canvas) {
+                  // Release all active pointer captures
+                  activePointerIdsRef.current.forEach(pointerId => {
+                    try {
+                      canvas.releasePointerCapture(pointerId);
+                    } catch (e) {
+                      // Ignore errors if pointer is already released
+                    }
+                  });
+                  activePointerIdsRef.current.clear();
+                }
+                
                 if (currentStrokeRef.current) {
                   const s = currentStrokeRef.current;
                   currentStrokeRef.current = null;
@@ -274,11 +325,17 @@ export default function CanvasSign({ onChange }: Props) {
                 }
                 autoStopTimerRef.current = null;
                 setRecordingTimeLeft(null);
+                autoStopExpiredRef.current = true; // Mark as expired to prevent auto-restart
+                setAutoStopExpired(true); // Update state for UI
               }, recordingDuration * 1000);
               
               autoStopIntervalRef.current = setInterval(() => {
                 setRecordingTimeLeft(prev => {
                   if (prev === null || prev <= 1) {
+                    if (autoStopIntervalRef.current) {
+                      clearInterval(autoStopIntervalRef.current);
+                      autoStopIntervalRef.current = null;
+                    }
                     return null;
                   }
                   return prev - 1;
@@ -310,11 +367,15 @@ export default function CanvasSign({ onChange }: Props) {
       ctx.lineTo(x * scale + pan.x * dpr, y * scale + pan.y * dpr); ctx.stroke();
     };
     const endStroke = () => {
-      if (!currentStrokeRef.current) return;
+      if (!currentStrokeRef.current) {
+        // Don't reset expired flag here - user needs to explicitly start new drawing
+        return;
+      }
       const s = currentStrokeRef.current;
       currentStrokeRef.current = null;
       setDrawing(false);
       trackpadMoveCountRef.current = 0;
+      activePointerIdsRef.current.clear();
       if (trackpadStartTimeoutRef.current) {
         clearTimeout(trackpadStartTimeoutRef.current);
         trackpadStartTimeoutRef.current = null;
@@ -330,6 +391,11 @@ export default function CanvasSign({ onChange }: Props) {
       setRecordingTimeLeft(null);
       setUndone([]);
       setStrokes(prev => [...prev, s]);
+      // Reset expired flag when stroke ends normally (not from timer)
+      if (!autoStopExpiredRef.current) {
+        autoStopExpiredRef.current = false;
+        setAutoStopExpired(false);
+      }
     };
     const onUp = () => endStroke();
     const onLeave = () => {
@@ -427,6 +493,11 @@ export default function CanvasSign({ onChange }: Props) {
               <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 xs:gap-3 flex-1 p-2 xs:p-3 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg xs:rounded-xl ring-1 ring-emerald-200/50 dark:ring-emerald-800/50">
                 <div className="flex items-center gap-2 xs:gap-3 flex-1">
                   <span className="text-xs xs:text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent whitespace-nowrap">Trackpad Mode</span>
+                  {autoStopExpired && autoStopEnabled && (
+                    <span className="text-[10px] xs:text-xs font-semibold text-amber-600 dark:text-amber-400 px-2 xs:px-2.5 py-0.5 xs:py-1 bg-amber-100 dark:bg-amber-950/40 rounded-full animate-pulse">
+                      ⏸️ Timer stopped - Toggle to resume
+                    </span>
+                  )}
                   <div className="flex items-center gap-2">
                     <button
                       className={`relative flex items-center gap-2 px-3 xs:px-4 py-1.5 xs:py-2 rounded-full text-xs xs:text-sm font-semibold transition-all duration-300 touch-manipulation min-w-[70px] xs:min-w-[80px] ${
@@ -457,6 +528,11 @@ export default function CanvasSign({ onChange }: Props) {
                             setStrokes(prev => [...prev, s]);
                           }
                         } else {
+                          // Reset expired flag when toggling trackpad mode on
+                          if (autoStopExpiredRef.current) {
+                            autoStopExpiredRef.current = false;
+                            setAutoStopExpired(false);
+                          }
                           setTrackpadCountdown(5);
                           if (trackpadCountdownIntervalRef.current) {
                             clearInterval(trackpadCountdownIntervalRef.current);
@@ -521,6 +597,8 @@ export default function CanvasSign({ onChange }: Props) {
                             autoStopIntervalRef.current = null;
                           }
                           setRecordingTimeLeft(null);
+                          autoStopExpiredRef.current = false; // Reset expired flag when disabling
+                          setAutoStopExpired(false); // Reset state for UI
                         }
                       }}
                       title={autoStopEnabled ? "Auto-stop timer enabled - drawing will stop automatically after set duration" : "Enable auto-stop timer - automatically stops drawing after set duration"}

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Stroke } from "../../types";
-import { getBounds, strokeLength, totalDurationMs } from "../../lib/pathUtils";
+import { getBounds, strokeLength, totalDurationMs, compressStrokeTimes } from "../../lib/pathUtils";
 
 type Props = { strokes: Stroke[] };
 
@@ -10,12 +10,13 @@ export default function Preview({ strokes }: Props) {
   const [playing, setPlaying] = useState(false);
   const [key, setKey] = useState(0);
 
-  const b = useMemo(() => getBounds(strokes), [strokes]);
-  const totalDur = useMemo(() => totalDurationMs(strokes) || 1, [strokes]);
-  const isWhite = useMemo(() => strokes.some(s => {
+  const compressedStrokes = useMemo(() => compressStrokeTimes(strokes), [strokes]);
+  const b = useMemo(() => getBounds(compressedStrokes), [compressedStrokes]);
+  const totalDur = useMemo(() => totalDurationMs(compressedStrokes) || 1, [compressedStrokes]);
+  const isWhite = useMemo(() => compressedStrokes.some(s => {
     const c = (s.color || "").toLowerCase();
     return c === "#ffffff" || c === "#fff";
-  }), [strokes]);
+  }), [compressedStrokes]);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -36,7 +37,7 @@ export default function Preview({ strokes }: Props) {
           <button 
             className="group flex-1 xs:flex-none min-w-[90px] px-5 xs:px-6 sm:px-7 py-2.5 xs:py-3 sm:py-3.5 rounded-lg xs:rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold shadow-xl hover:shadow-2xl ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-1.5 xs:gap-2 active:scale-95 touch-manipulation text-xs xs:text-sm" 
             onClick={onPlay} 
-            disabled={!strokes.length || playing}
+            disabled={!compressedStrokes.length || playing}
           >
             <span className="text-base xs:text-xl">▶️</span>
             <span>Play</span>
@@ -44,7 +45,7 @@ export default function Preview({ strokes }: Props) {
           <button 
             className="group flex-1 xs:flex-none min-w-[90px] px-5 xs:px-6 sm:px-7 py-2.5 xs:py-3 sm:py-3.5 rounded-lg xs:rounded-xl bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white font-semibold shadow-xl hover:shadow-2xl ring-2 ring-white/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-1.5 xs:gap-2 active:scale-95 touch-manipulation text-xs xs:text-sm" 
             onClick={onPause} 
-            disabled={!strokes.length || !playing}
+            disabled={!compressedStrokes.length || !playing}
           >
             <span className="text-base xs:text-xl">⏸️</span>
             <span>Pause</span>
@@ -52,12 +53,12 @@ export default function Preview({ strokes }: Props) {
           <button 
             className="flex-1 xs:flex-none min-w-[90px] px-5 xs:px-6 sm:px-7 py-2.5 xs:py-3 sm:py-3.5 rounded-lg xs:rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-slate-700 dark:text-slate-200 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-700 dark:hover:to-slate-600 font-semibold shadow-lg hover:shadow-xl ring-1 ring-slate-300 dark:ring-slate-600 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center gap-1.5 xs:gap-2 active:scale-95 touch-manipulation text-xs xs:text-sm" 
             onClick={onRestart} 
-            disabled={!strokes.length}
+            disabled={!compressedStrokes.length}
           >
             <span className="text-base xs:text-xl">⏮️</span>
             <span>Restart</span>
           </button>
-          {strokes.length > 0 && (
+          {compressedStrokes.length > 0 && (
             <div className="w-full xs:w-auto xs:ml-auto flex items-center justify-center gap-1.5 xs:gap-2 px-3 xs:px-4 sm:px-5 py-2 xs:py-2.5 sm:py-3 rounded-lg xs:rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-800 shadow-lg mt-2 xs:mt-0">
               <span className="text-xs xs:text-sm font-semibold">Duration:</span>
               <span className="text-xs xs:text-sm font-bold">{(totalDur / 1000).toFixed(2)}s</span>
@@ -72,7 +73,7 @@ export default function Preview({ strokes }: Props) {
           : "bg-gradient-to-br from-white/90 to-purple-50/90 dark:from-slate-900/90 dark:to-purple-950/90 backdrop-blur-xl ring-purple-200/40 dark:ring-purple-800/40"
       }`}>
         <div className="h-[40vh] xs:h-[45vh] sm:h-[50vh] md:h-[400px] lg:h-[600px] relative">
-          {!strokes.length && (
+          {!compressedStrokes.length && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center space-y-3 xs:space-y-4 px-4">
                 <div className="text-5xl xs:text-6xl sm:text-7xl mb-4 xs:mb-6 animate-float">✍️</div>
@@ -88,7 +89,7 @@ export default function Preview({ strokes }: Props) {
             viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`} 
             preserveAspectRatio="xMidYMid meet"
           >
-            {strokes.map((s, idx) => {
+            {compressedStrokes.map((s, idx) => {
               const len = strokeLength(s);
               const clamp = (v: number) => Math.min(1, Math.max(0, v));
               const times = s.points.map(p => clamp(p.t / totalDur));

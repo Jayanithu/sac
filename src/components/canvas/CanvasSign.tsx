@@ -20,7 +20,9 @@ export default function CanvasSign({ onChange }: Props) {
   const [pan, setPan] = useState<{x:number;y:number}>({ x: 0, y: 0 });
   const [shiftDown, setShiftDown] = useState(false);
   const [trackpadMode, setTrackpadMode] = useState(false);
-  const [trackpadCountdown, setTrackpadCountdown] = useState<number | null>(null);
+  const [trackpadTimerEnabled, setTrackpadTimerEnabled] = useState(false);
+  const [trackpadTimerDuration, setTrackpadTimerDuration] = useState(10);
+  const [trackpadTimerLeft, setTrackpadTimerLeft] = useState<number | null>(null);
   const [autoStopEnabled, setAutoStopEnabled] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(10);
   const [recordingTimeLeft, setRecordingTimeLeft] = useState<number | null>(null);
@@ -30,7 +32,8 @@ export default function CanvasSign({ onChange }: Props) {
   const lastMoveTimeRef = useRef<number>(0);
   const trackpadMoveCountRef = useRef<number>(0);
   const trackpadStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const trackpadCountdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const trackpadTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const trackpadTimerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const autoStopTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoStopIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activePointerIdsRef = useRef<Set<number>>(new Set());
@@ -105,8 +108,11 @@ export default function CanvasSign({ onChange }: Props) {
 
   useEffect(() => {
     return () => {
-      if (trackpadCountdownIntervalRef.current) {
-        clearInterval(trackpadCountdownIntervalRef.current);
+      if (trackpadTimerRef.current) {
+        clearTimeout(trackpadTimerRef.current);
+      }
+      if (trackpadTimerIntervalRef.current) {
+        clearInterval(trackpadTimerIntervalRef.current);
       }
       if (autoStopTimerRef.current) {
         clearTimeout(autoStopTimerRef.current);
@@ -209,6 +215,51 @@ export default function CanvasSign({ onChange }: Props) {
       ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, width * (e.pressure || 1)) * scale; ctx.lineCap = "round"; ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(x * scale + pan.x * dpr, y * scale + pan.y * dpr);
       
+      // Start trackpad timer if enabled (for trackpad mode)
+      if (trackpadMode && trackpadTimerEnabled && !trackpadTimerRef.current) {
+        setTrackpadTimerLeft(trackpadTimerDuration);
+        trackpadTimerRef.current = setTimeout(() => {
+          const canvas = canvasRef.current;
+          if (canvas) {
+            activePointerIdsRef.current.forEach(pointerId => {
+              try {
+                canvas.releasePointerCapture(pointerId);
+              } catch (e) {
+                // Ignore errors if pointer is already released
+              }
+            });
+            activePointerIdsRef.current.clear();
+          }
+          
+          if (currentStrokeRef.current) {
+            const s = currentStrokeRef.current;
+            currentStrokeRef.current = null;
+            setDrawing(false);
+            setUndone([]);
+            setStrokes(prev => [...prev, s]);
+          }
+          if (trackpadTimerIntervalRef.current) {
+            clearInterval(trackpadTimerIntervalRef.current);
+            trackpadTimerIntervalRef.current = null;
+          }
+          trackpadTimerRef.current = null;
+          setTrackpadTimerLeft(null);
+        }, trackpadTimerDuration * 1000);
+        
+        trackpadTimerIntervalRef.current = setInterval(() => {
+          setTrackpadTimerLeft(prev => {
+            if (prev === null || prev <= 1) {
+              if (trackpadTimerIntervalRef.current) {
+                clearInterval(trackpadTimerIntervalRef.current);
+                trackpadTimerIntervalRef.current = null;
+              }
+              return null;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+      
       if (autoStopEnabled && !autoStopTimerRef.current) {
         setRecordingTimeLeft(recordingDuration);
         autoStopTimerRef.current = setTimeout(() => {
@@ -272,7 +323,7 @@ export default function CanvasSign({ onChange }: Props) {
       const timeSinceLastMove = now - lastMoveTimeRef.current;
       lastMoveTimeRef.current = now;
       
-      if (trackpadMode && trackpadCountdown === null && !drawing && e.pointerType === 'mouse' && !autoStopExpiredRef.current) {
+      if (trackpadMode && !drawing && e.pointerType === 'mouse' && !autoStopExpiredRef.current) {
         if (timeSinceLastMove < 150 || trackpadMoveCountRef.current > 0) {
           trackpadMoveCountRef.current += 1;
           if (trackpadMoveCountRef.current >= 1) {
@@ -294,6 +345,51 @@ export default function CanvasSign({ onChange }: Props) {
             ctx.lineJoin = "round";
             ctx.beginPath();
             ctx.moveTo(x * scale + pan.x * dpr, y * scale + pan.y * dpr);
+            
+            // Start trackpad timer if enabled
+            if (trackpadTimerEnabled && !trackpadTimerRef.current) {
+              setTrackpadTimerLeft(trackpadTimerDuration);
+              trackpadTimerRef.current = setTimeout(() => {
+                const canvas = canvasRef.current;
+                if (canvas) {
+                  activePointerIdsRef.current.forEach(pointerId => {
+                    try {
+                      canvas.releasePointerCapture(pointerId);
+                    } catch (e) {
+                      // Ignore errors if pointer is already released
+                    }
+                  });
+                  activePointerIdsRef.current.clear();
+                }
+                
+                if (currentStrokeRef.current) {
+                  const s = currentStrokeRef.current;
+                  currentStrokeRef.current = null;
+                  setDrawing(false);
+                  setUndone([]);
+                  setStrokes(prev => [...prev, s]);
+                }
+                if (trackpadTimerIntervalRef.current) {
+                  clearInterval(trackpadTimerIntervalRef.current);
+                  trackpadTimerIntervalRef.current = null;
+                }
+                trackpadTimerRef.current = null;
+                setTrackpadTimerLeft(null);
+              }, trackpadTimerDuration * 1000);
+              
+              trackpadTimerIntervalRef.current = setInterval(() => {
+                setTrackpadTimerLeft(prev => {
+                  if (prev === null || prev <= 1) {
+                    if (trackpadTimerIntervalRef.current) {
+                      clearInterval(trackpadTimerIntervalRef.current);
+                      trackpadTimerIntervalRef.current = null;
+                    }
+                    return null;
+                  }
+                  return prev - 1;
+                });
+              }, 1000);
+            }
             
             if (autoStopEnabled && !autoStopTimerRef.current) {
               autoStopExpiredRef.current = false; // Reset expired flag when starting new drawing
@@ -381,6 +477,14 @@ export default function CanvasSign({ onChange }: Props) {
         clearTimeout(trackpadStartTimeoutRef.current);
         trackpadStartTimeoutRef.current = null;
       }
+      if (trackpadTimerRef.current) {
+        clearTimeout(trackpadTimerRef.current);
+        trackpadTimerRef.current = null;
+      }
+      if (trackpadTimerIntervalRef.current) {
+        clearInterval(trackpadTimerIntervalRef.current);
+        trackpadTimerIntervalRef.current = null;
+      }
       if (autoStopTimerRef.current) {
         clearTimeout(autoStopTimerRef.current);
         autoStopTimerRef.current = null;
@@ -389,6 +493,7 @@ export default function CanvasSign({ onChange }: Props) {
         clearInterval(autoStopIntervalRef.current);
         autoStopIntervalRef.current = null;
       }
+      setTrackpadTimerLeft(null);
       setRecordingTimeLeft(null);
       setUndone([]);
       setStrokes(prev => [...prev, s]);
@@ -439,9 +544,14 @@ export default function CanvasSign({ onChange }: Props) {
         setPan={setPan}
         trackpadMode={trackpadMode}
         setTrackpadMode={setTrackpadMode}
-        trackpadCountdown={trackpadCountdown}
-        setTrackpadCountdown={setTrackpadCountdown}
-        trackpadCountdownIntervalRef={trackpadCountdownIntervalRef}
+        trackpadTimerEnabled={trackpadTimerEnabled}
+        setTrackpadTimerEnabled={setTrackpadTimerEnabled}
+        trackpadTimerDuration={trackpadTimerDuration}
+        setTrackpadTimerDuration={setTrackpadTimerDuration}
+        trackpadTimerLeft={trackpadTimerLeft}
+        trackpadTimerRef={trackpadTimerRef}
+        trackpadTimerIntervalRef={trackpadTimerIntervalRef}
+        setTrackpadTimerLeft={setTrackpadTimerLeft}
         drawing={drawing}
         currentStrokeRef={currentStrokeRef}
         setDrawing={setDrawing}
